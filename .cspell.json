@@ -1,0 +1,46 @@
+{
+  "version": "0.2",
+  "language": "en,ar",
+  "words": [
+    "adeni",
+    "Adeni",
+    "albarika",
+    "capacitor",
+    "clsx",
+    "drizzle",
+    "FDFF",
+    "FEFF",
+    "fiqh",
+    "Glassmorphism",
+    "haraj",
+    "Haraj",
+    "hoverable",
+    "lucide",
+    "morphism",
+    "postgres",
+    "seerah",
+    "supabase",
+    "tailwindcss",
+    "WCAG",
+    "wouter"
+  ],
+  "ignorePaths": [
+    "node_modules",
+    "dist",
+    "build",
+    ".git",
+    "*.min.js",
+    "package-lock.json"
+  ],
+  "ignoreRegExpList": [
+    "/[\\u0600-\\u06FF\\u0750-\\u077F\\u08A0-\\u08FF\\uFB50-\\uFDFF\\uFE70-\\uFEFF]+/g"
+  ],
+  "languageSettings": [
+    {
+      "languageId": "typescript,typescriptreact,javascript,javascriptreact",
+      "ignoreRegExpList": [
+        "/[\\u0600-\\u06FF\\u0750-\\u077F\\u08A0-\\u08FF\\uFB50-\\uFDFF\\uFE70-\\uFEFF]+/g"
+      ]
+    }
+  ]
+}

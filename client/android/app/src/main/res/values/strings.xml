@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Aden Live</string>
+    <string name="title_activity_main">Aden Live</string>
+    <string name="package_name">com.adenlive.app</string>
+    <string name="custom_url_scheme">com.adenlive.app</string>
+</resources>

@@ -1,0 +1,1553 @@
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useLocation } from 'wouter';
+import AppHeader from '@/components/AppHeader';
+import AppFooter from '@/components/AppFooter';
+import OptimizedCard from '@/components/OptimizedCard';
+import AdCard from '@/components/AdCard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { useDebounce } from '@/hooks/useDebounce';
+import { 
+  Search, 
+  Filter, 
+  MapPin, 
+  Clock, 
+  Eye, 
+  Heart, 
+  Share2, 
+  Plus,
+  ArrowLeft,
+  Store,
+  Smartphone,
+  Laptop,
+  Car,
+  Home,
+  Shirt,
+  Gamepad2,
+  Camera,
+  Headphones,
+  Book,
+  Dumbbell,
+  Utensils,
+  Baby,
+  Wrench,
+  Star,
+  MessageCircle,
+  Phone,
+  Calendar,
+  Tag,
+  TrendingUp,
+  Users,
+  Shield,
+  CheckCircle,
+  AlertCircle,
+  ChevronDown,
+  ChevronUp,
+  ChevronRight,
+  X,
+  Save,
+  Trash2,
+  Upload,
+  Image,
+  ChevronLeft,
+  ChevronRight as ChevronRightIcon,
+  Flag,
+  HelpCircle
+} from 'lucide-react';
+
+// CSS للأنيميشن
+const fadeInUpStyle = `
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+
+// إضافة الأنيميشن للصفحة
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.textContent = fadeInUpStyle;
+  document.head.appendChild(style);
+}
+
+// Interfaces للبيانات
+interface Ad {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  category: string;
+  district: string;
+  seller: string;
+  sellerRating: number;
+  sellerAdsCount: number;
+  images: string[];
+  condition: string;
+  negotiable: boolean;
+  views: number;
+  likes: number;
+  postedAt: string;
+  isVerified: boolean;
+  isFeatured: boolean;
+  contactNumber?: string;
+}
+
+interface NewAdForm {
+  title: string;
+  description: string;
+  price: string;
+  category: string;
+  district: string;
+  condition: string;
+  negotiable: boolean;
+  contactNumber: string;
+  images: File[];
+}
+
+// دوال localStorage
+const saveToLocalStorage = (key: string, data: any) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (error) {
+    console.error('Error saving to localStorage:', error);
+  }
+};
+
+const loadFromLocalStorage = (key: string, defaultValue: any = null) => {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : defaultValue;
+  } catch (error) {
+    console.error('Error loading from localStorage:', error);
+    return defaultValue;
+  }
+};
+
+// مديريات عدن (المديريات الأساسية فقط)
+const ADEN_DISTRICTS = [
+  { id: 'aden_crater', name: 'عدن كريتر', icon: '🏛️' },
+  { id: 'khormaksar', name: 'خور مكسر', icon: '✈️' },
+  { id: 'maalla', name: 'المعلا', icon: '🏘️' },
+  { id: 'tawahi', name: 'التواهي', icon: '🌊' },
+  { id: 'sheikh_othman', name: 'الشيخ عثمان', icon: '🕌' },
+  { id: 'mansoura', name: 'المنصورة', icon: '🏭' },
+  { id: 'dar_saad', name: 'دار سعد', icon: '🏡' },
+  { id: 'albarika', name: 'البريقة', icon: '🏭' },
+  { id: 'alqaloua', name: 'القلوعة', icon: '🏘️' },
+  { id: 'almamadara', name: 'الممدارة', icon: '🏪' }
+];
+
+// فئات السلع
+const PRODUCT_CATEGORIES = [
+  { id: 'real_estate', name: 'عقارات', icon: Home, color: 'bg-emerald-600', count: 24 },
+  { id: 'vehicles', name: 'مركبات', icon: Car, color: 'bg-green-500', count: 18 },
+  { id: 'electronics', name: 'إلكترونيات', icon: Smartphone, color: 'bg-blue-500', count: 45 },
+  { id: 'computers', name: 'أجهزة كمبيوتر', icon: Laptop, color: 'bg-purple-500', count: 23 },
+  { id: 'furniture', name: 'أثاث', icon: Home, color: 'bg-orange-500', count: 32 },
+  { id: 'clothing', name: 'ملابس', icon: Shirt, color: 'bg-pink-500', count: 67 },
+  { id: 'gaming', name: 'ألعاب', icon: Gamepad2, color: 'bg-indigo-500', count: 15 },
+  { id: 'cameras', name: 'كاميرات', icon: Camera, color: 'bg-red-500', count: 12 },
+  { id: 'audio', name: 'صوتيات', icon: Headphones, color: 'bg-yellow-500', count: 28 },
+  { id: 'books', name: 'كتب', icon: Book, color: 'bg-teal-500', count: 41 },
+  { id: 'sports', name: 'رياضة', icon: Dumbbell, color: 'bg-emerald-500', count: 19 },
+  { id: 'kitchen', name: 'مطبخ', icon: Utensils, color: 'bg-amber-500', count: 25 },
+  { id: 'baby', name: 'أطفال', icon: Baby, color: 'bg-rose-500', count: 16 },
+  { id: 'tools', name: 'أدوات', icon: Wrench, color: 'bg-gray-500', count: 22 },
+  { id: 'jewelry', name: 'مجوهرات', icon: Star, color: 'bg-yellow-600', count: 8 },
+  { id: 'watches', name: 'ساعات', icon: Clock, color: 'bg-cyan-500', count: 14 },
+  { id: 'bikes', name: 'دراجات', icon: Car, color: 'bg-lime-500', count: 11 },
+  { id: 'pets', name: 'حيوانات', icon: Heart, color: 'bg-pink-600', count: 7 },
+  { id: 'art', name: 'فنون', icon: Star, color: 'bg-violet-500', count: 9 },
+  { id: 'music', name: 'موسيقى', icon: Headphones, color: 'bg-purple-600', count: 13 },
+  { id: 'garden', name: 'حديقة', icon: Home, color: 'bg-green-600', count: 6 },
+  { id: 'office', name: 'مكتب', icon: Laptop, color: 'bg-blue-600', count: 17 },
+  { id: 'other', name: 'أخرى', icon: Store, color: 'bg-slate-500', count: 35 }
+];
+
+// خيارات حالة السلع
+const CONDITION_OPTIONS = [
+  { id: 'new', name: 'جديد', description: 'لم يُستخدم من قبل' },
+  { id: 'excellent', name: 'ممتازة', description: 'حالة ممتازة جداً' },
+  { id: 'very_good', name: 'جيدة جداً', description: 'حالة جيدة جداً' },
+  { id: 'good', name: 'جيدة', description: 'حالة جيدة' },
+  { id: 'fair', name: 'مقبولة', description: 'حالة مقبولة' }
+];
+
+// بيانات تجريبية للإعلانات
+const mockAds = [
+  {
+    id: '1',
+    title: 'آيفون 13 برو ماكس - حالة ممتازة',
+    description: 'آيفون 13 برو ماكس 256 جيجا، لون أزرق، حالة ممتازة جداً، مع الشاحن والكابل الأصلي، بدون خدوش',
+    price: 450000,
+    originalPrice: 550000,
+    category: 'electronics',
+    district: 'crater',
+    seller: 'أحمد محمد',
+    sellerRating: 4.8,
+    sellerAdsCount: 12,
+    images: ['📱', '📱', '📱'],
+    condition: 'ممتازة',
+    negotiable: true,
+    views: 156,
+    likes: 23,
+    postedAt: '2024-01-28T10:30:00Z',
+    isVerified: true,
+    isFeatured: true
+  },
+  {
+    id: '2',
+    title: 'لابتوب ديل Inspiron 15 - للطلاب',
+    description: 'لابتوب ديل Inspiron 15، معالج i5، 8 جيجا رام، 256 جيجا SSD، مناسب للطلاب والعمل',
+    price: 320000,
+    originalPrice: 380000,
+    category: 'computers',
+    district: 'maalla',
+    seller: 'فاطمة علي',
+    sellerRating: 4.6,
+    sellerAdsCount: 8,
+    images: ['💻', '💻'],
+    condition: 'جيدة جداً',
+    negotiable: true,
+    views: 89,
+    likes: 15,
+    postedAt: '2024-01-28T08:15:00Z',
+    isVerified: false,
+    isFeatured: false
+  },
+  {
+    id: '3',
+    title: 'سيارة تويوتا كامري 2018 - فحص كامل',
+    description: 'سيارة تويوتا كامري 2018، لون أبيض، 4 سلندر، فحص كامل، صيانة دورية، بدون حوادث',
+    price: 8500000,
+    originalPrice: 9500000,
+    category: 'vehicles',
+    district: 'tawahi',
+    seller: 'محمد سالم',
+    sellerRating: 4.9,
+    sellerAdsCount: 25,
+    images: ['🚗', '🚗', '🚗', '🚗'],
+    condition: 'ممتازة',
+    negotiable: true,
+    views: 234,
+    likes: 45,
+    postedAt: '2024-01-27T16:45:00Z',
+    isVerified: true,
+    isFeatured: true
+  },
+  {
+    id: '4',
+    title: 'طقم أثاث غرفة نوم - خشب أصلي',
+    description: 'طقم أثاث غرفة نوم كامل، خشب أصلي، سرير + دولاب + كومودينو، حالة جيدة جداً',
+    price: 180000,
+    originalPrice: 220000,
+    category: 'furniture',
+    district: 'mansoura',
+    seller: 'سارة أحمد',
+    sellerRating: 4.7,
+    sellerAdsCount: 6,
+    images: ['🛏️', '🛏️'],
+    condition: 'جيدة جداً',
+    negotiable: true,
+    views: 67,
+    likes: 12,
+    postedAt: '2024-01-27T14:20:00Z',
+    isVerified: false,
+    isFeatured: false
+  },
+  {
+    id: '5',
+    title: 'كاميرا كانون EOS 80D - مع عدسات',
+    description: 'كاميرا كانون EOS 80D، مع عدسة 18-55mm، حالة ممتازة، مناسبة للمصورين المبتدئين',
+    price: 280000,
+    originalPrice: 320000,
+    category: 'cameras',
+    district: 'khormaksar',
+    seller: 'علي حسن',
+    sellerRating: 4.8,
+    sellerAdsCount: 15,
+    images: ['📷', '📷', '📷'],
+    condition: 'ممتازة',
+    negotiable: false,
+    views: 123,
+    likes: 28,
+    postedAt: '2024-01-27T11:30:00Z',
+    isVerified: true,
+    isFeatured: false
+  },
+  {
+    id: '6',
+    title: 'سماعات AirPods Pro - أصلية',
+    description: 'سماعات AirPods Pro أصلية، حالة ممتازة، مع علبة الشحن، بدون مشاكل في الصوت',
+    price: 85000,
+    originalPrice: 95000,
+    category: 'audio',
+    district: 'sheikh_othman',
+    seller: 'نور الدين',
+    sellerRating: 4.5,
+    sellerAdsCount: 9,
+    images: ['🎧', '🎧'],
+    condition: 'ممتازة',
+    negotiable: true,
+    views: 78,
+    likes: 19,
+    postedAt: '2024-01-27T09:15:00Z',
+    isVerified: false,
+    isFeatured: false
+  },
+  {
+    id: '7',
+    title: 'شقة 3 غرف نوم - كريتر',
+    description: 'شقة مفروشة بالكامل، 3 غرف نوم، صالة، مطبخ، حمامين، في موقع مميز بكريتر',
+    price: 1200000,
+    originalPrice: 1400000,
+    category: 'real_estate',
+    district: 'crater',
+    seller: 'عبدالله محمد',
+    sellerRating: 4.9,
+    sellerAdsCount: 31,
+    images: ['🏠', '🏠', '🏠'],
+    condition: 'ممتازة',
+    negotiable: true,
+    views: 189,
+    likes: 42,
+    postedAt: '2024-01-26T14:30:00Z',
+    isVerified: true,
+    isFeatured: true
+  },
+  {
+    id: '8',
+    title: 'أرض سكنية - المعلا',
+    description: 'أرض سكنية 500 متر مربع، في حي هادئ بالمعلا، قريبة من الخدمات والطرق الرئيسية',
+    price: 2500000,
+    originalPrice: 2800000,
+    category: 'real_estate',
+    district: 'maalla',
+    seller: 'فاطمة أحمد',
+    sellerRating: 4.7,
+    sellerAdsCount: 18,
+    images: ['🏞️', '🏞️'],
+    condition: 'جيدة جداً',
+    negotiable: true,
+    views: 156,
+    likes: 28,
+    postedAt: '2024-01-26T11:45:00Z',
+    isVerified: true,
+    isFeatured: false
+  }
+];
+
+export default function HarajAdenPage() {
+  const [, setLocation] = useLocation();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedDistrict, setSelectedDistrict] = useState('all');
+  const [priceRange, setPriceRange] = useState({ min: '', max: '' });
+  const [sortBy, setSortBy] = useState('newest');
+  const [showFilters, setShowFilters] = useState(false);
+  const [likedAds, setLikedAds] = useState<Set<string>>(new Set());
+  const [showAddAd, setShowAddAd] = useState(false);
+  
+  // Debounced search for better performance
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  
+  // Memoized callbacks for better performance
+  const handleLike = useCallback((id: string) => {
+    setLikedAds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  }, []);
+  
+  const handleShare = useCallback((ad: any) => {
+    if (navigator.share) {
+      navigator.share({
+        title: ad.title,
+        text: ad.description,
+        url: window.location.href
+      });
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(`${ad.title} - ${ad.description}`);
+    }
+  }, []);
+  
+  const handleViewAd = useCallback((ad: any) => {
+    setSelectedAd(ad);
+    setShowAdDetails(true);
+  }, []);
+  
+  // States جديدة للتحسينات
+  const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [allAds, setAllAds] = useState<Ad[]>(mockAds);
+  const [newAdForm, setNewAdForm] = useState<NewAdForm>({
+    title: '',
+    description: '',
+    price: '',
+    category: '',
+    district: '',
+    condition: '',
+    negotiable: false,
+    contactNumber: '',
+    images: []
+  });
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
+  const [showAdDetails, setShowAdDetails] = useState(false);
+  const [showAdTypeSelection, setShowAdTypeSelection] = useState(false);
+  
+  // States جديدة للتحسينات
+  const [currentImageIndex, setCurrentImageIndex] = useState<Record<string, number>>({});
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [reportDetails, setReportDetails] = useState('');
+  const [showSupportModal, setShowSupportModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // تحميل البيانات المحفوظة عند بدء التطبيق
+  useEffect(() => {
+    const savedAds = loadFromLocalStorage('haraj_ads', mockAds);
+    const savedLikedAds = loadFromLocalStorage('haraj_liked_ads', []);
+    const savedRecentSearches = loadFromLocalStorage('haraj_recent_searches', []);
+    const savedFilters = loadFromLocalStorage('haraj_filters', {});
+
+    setAllAds(savedAds);
+    setLikedAds(new Set(savedLikedAds));
+    setRecentSearches(savedRecentSearches);
+    
+    // استرجاع الفلاتر المحفوظة
+    if (savedFilters.searchQuery) setSearchQuery(savedFilters.searchQuery);
+    if (savedFilters.selectedCategory) setSelectedCategory(savedFilters.selectedCategory);
+    if (savedFilters.selectedDistrict) setSelectedDistrict(savedFilters.selectedDistrict);
+    if (savedFilters.sortBy) setSortBy(savedFilters.sortBy);
+  }, []);
+
+  // إغلاق النوافذ باستخدام مفتاح Escape
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowAdDetails(false);
+        setShowAddAd(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, []);
+
+  // حفظ البيانات عند التغيير
+  useEffect(() => {
+    saveToLocalStorage('haraj_ads', allAds);
+  }, [allAds]);
+
+  useEffect(() => {
+    saveToLocalStorage('haraj_liked_ads', Array.from(likedAds));
+  }, [likedAds]);
+
+  useEffect(() => {
+    saveToLocalStorage('haraj_recent_searches', recentSearches);
+  }, [recentSearches]);
+
+  useEffect(() => {
+    const filters = {
+      searchQuery,
+      selectedCategory,
+      selectedDistrict,
+      sortBy
+    };
+    saveToLocalStorage('haraj_filters', filters);
+  }, [searchQuery, selectedCategory, selectedDistrict, sortBy]);
+
+  // فلترة الإعلانات مع debounced search
+  const filteredAds = useMemo(() => {
+    let filtered = allAds.filter(ad => {
+      const matchesSearch = ad.title.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+                           ad.description.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === 'all' || ad.category === selectedCategory;
+      const matchesDistrict = selectedDistrict === 'all' || ad.district === selectedDistrict;
+      
+      return matchesSearch && matchesCategory && matchesDistrict;
+    });
+
+    // ترتيب الإعلانات - الإعلانات المميزة أولاً
+    filtered.sort((a, b) => {
+      // الإعلانات المميزة تظهر أولاً دائماً
+      const aFeatured = a.isFeatured ? 1 : 0;
+      const bFeatured = b.isFeatured ? 1 : 0;
+      
+      if (aFeatured !== bFeatured) {
+        return bFeatured - aFeatured;
+      }
+      
+      // ترتيب الإعلانات العادية حسب المعيار المختار
+      switch (sortBy) {
+        case 'newest':
+          return new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime();
+        case 'oldest':
+          return new Date(a.postedAt).getTime() - new Date(b.postedAt).getTime();
+        case 'price_low':
+          return a.price - b.price;
+        case 'price_high':
+          return b.price - a.price;
+        case 'views':
+          return b.views - a.views;
+        case 'featured':
+          // في حالة "المميزة أولاً"، الإعلانات المميزة تظهر أولاً ثم العادية
+          return 0; // تم الترتيب بالفعل أعلاه
+        default:
+          return new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime(); // الأحدث أولاً كافتراضي
+      }
+    });
+
+    return filtered;
+  }, [debouncedSearchQuery, selectedCategory, selectedDistrict, priceRange, sortBy, allAds]);
+
+  // إحصائيات سريعة
+  const stats = useMemo(() => ({
+    totalAds: allAds.length,
+    totalCategories: PRODUCT_CATEGORIES.length,
+    totalDistricts: ADEN_DISTRICTS.length,
+    featuredAds: allAds.filter(ad => ad.isFeatured).length,
+    verifiedSellers: allAds.filter(ad => ad.isVerified).length
+  }), [allAds]);
+
+  const formatPrice = (price: number) => {
+    return price.toLocaleString('ar-YE') + ' ريال';
+  };
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'منذ دقائق';
+    if (diffInHours < 24) return `منذ ${diffInHours} ساعة`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `منذ ${diffInDays} يوم`;
+    return date.toLocaleDateString('ar-YE');
+  };
+
+  // دالة البحث الذكي
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    
+    if (value.length > 1) {
+      const suggestions = allAds
+        .filter(ad => 
+          ad.title.toLowerCase().includes(value.toLowerCase()) ||
+          ad.description.toLowerCase().includes(value.toLowerCase())
+        )
+        .map(ad => ad.title)
+        .slice(0, 5);
+      
+      setSearchSuggestions(suggestions);
+      setShowSuggestions(true);
+    } else {
+      setShowSuggestions(false);
+    }
+  };
+
+  // دالة إضافة البحث للمؤرخ
+  const addToRecentSearches = (query: string) => {
+    if (query.trim() && !recentSearches.includes(query)) {
+      const newRecentSearches = [query, ...recentSearches].slice(0, 5);
+      setRecentSearches(newRecentSearches);
+    }
+  };
+
+  // دالة إضافة إعلان جديد
+  const handleAddAd = () => {
+    // التحقق من صحة البيانات
+    const errors: Record<string, string> = {};
+    
+    if (!newAdForm.title.trim()) errors.title = 'العنوان مطلوب';
+    if (!newAdForm.description.trim()) errors.description = 'الوصف مطلوب';
+    if (!newAdForm.price.trim()) errors.price = 'السعر مطلوب';
+    if (!newAdForm.category) errors.category = 'الفئة مطلوبة';
+    if (!newAdForm.district) errors.district = 'المديرية مطلوبة';
+    if (!newAdForm.condition) errors.condition = 'الحالة مطلوبة';
+    if (!newAdForm.contactNumber.trim()) errors.contactNumber = 'رقم التواصل مطلوب';
+
+    setFormErrors(errors);
+
+    if (Object.keys(errors).length === 0) {
+      const newAd: Ad = {
+        id: Date.now().toString(),
+        title: newAdForm.title,
+        description: newAdForm.description,
+        price: parseInt(newAdForm.price),
+        category: newAdForm.category,
+        district: newAdForm.district,
+        seller: 'مستخدم جديد', // يمكن ربطه بنظام المستخدمين لاحقاً
+        sellerRating: 5.0,
+        sellerAdsCount: 1,
+        images: newAdForm.images.length > 0 
+          ? newAdForm.images.map(() => '📷') 
+          : ['📦'], // صور افتراضية
+        condition: newAdForm.condition,
+        negotiable: newAdForm.negotiable,
+        views: 0,
+        likes: 0,
+        postedAt: new Date().toISOString(),
+        isVerified: false,
+        isFeatured: false,
+        contactNumber: newAdForm.contactNumber
+      };
+
+      setAllAds(prev => [newAd, ...prev]);
+      
+      // إعادة تعيين النموذج
+      setNewAdForm({
+        title: '',
+        description: '',
+        price: '',
+        category: '',
+        district: '',
+        condition: '',
+        negotiable: false,
+        contactNumber: '',
+        images: []
+      });
+      
+      setShowAddAd(false);
+      setFormErrors({});
+      
+      // رسالة نجاح
+      alert('تم نشر إعلانك بنجاح! 🎉');
+    }
+  };
+
+  // دالة مسح جميع الفلاتر
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setSelectedCategory('all');
+    setSelectedDistrict('all');
+    setSortBy('newest');
+  };
+
+  const toggleLike = (adId: string) => {
+    setLikedAds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(adId)) {
+        newSet.delete(adId);
+        setToastMessage('تمت الإزالة من المفضلة');
+      } else {
+        newSet.add(adId);
+        setToastMessage('تمت الإضافة إلى المفضلة');
+      }
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+      return newSet;
+    });
+  };
+
+  // دوال جديدة للتحسينات
+  const nextImage = (adId: string, totalImages: number) => {
+    setCurrentImageIndex(prev => ({
+      ...prev,
+      [adId]: ((prev[adId] || 0) + 1) % totalImages
+    }));
+  };
+
+  const prevImage = (adId: string, totalImages: number) => {
+    setCurrentImageIndex(prev => ({
+      ...prev,
+      [adId]: ((prev[adId] || 0) - 1 + totalImages) % totalImages
+    }));
+  };
+
+  const isNewAd = (postedAt: string) => {
+    const now = new Date();
+    const adDate = new Date(postedAt);
+    const diffInHours = (now.getTime() - adDate.getTime()) / (1000 * 60 * 60);
+    return diffInHours < 24;
+  };
+
+  const isExpiringAd = (postedAt: string) => {
+    const now = new Date();
+    const adDate = new Date(postedAt);
+    const diffInDays = (now.getTime() - adDate.getTime()) / (1000 * 60 * 60 * 24);
+    return diffInDays > 25;
+  };
+
+  const handleReport = async () => {
+    if (reportReason) {
+      setIsLoading(true);
+      
+      // محاكاة إرسال البلاغ
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      setToastMessage('تم إرسال البلاغ بنجاح');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+      setShowReportModal(false);
+      setReportReason('');
+      setReportDetails('');
+      setIsLoading(false);
+    }
+  };
+
+  const handleSupport = () => {
+    setToastMessage('تم إرسال رسالتك للدعم');
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+    setShowSupportModal(false);
+  };
+
+  // دالة للحصول على الإعلانات المشابهة
+  const getSimilarAds = (currentAd: Ad) => {
+    return allAds
+      .filter(ad => 
+        ad.id !== currentAd.id && // استبعاد الإعلان الحالي
+        (ad.category === currentAd.category || // نفس الفئة
+         ad.district === currentAd.district) // أو نفس المديرية
+      )
+      .sort((a, b) => {
+        // ترتيب حسب التشابه (نفس الفئة أولاً، ثم نفس المديرية)
+        const aCategoryMatch = a.category === currentAd.category ? 2 : 0;
+        const aDistrictMatch = a.district === currentAd.district ? 1 : 0;
+        const bCategoryMatch = b.category === currentAd.category ? 2 : 0;
+        const bDistrictMatch = b.district === currentAd.district ? 1 : 0;
+        
+        const aScore = aCategoryMatch + aDistrictMatch;
+        const bScore = bCategoryMatch + bDistrictMatch;
+        
+        return bScore - aScore;
+      })
+      .slice(0, 4); // عرض 4 إعلانات مشابهة فقط
+  };
+
+  // دعم التنقل بالكيبورد في معرض الصور
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!selectedAd) return;
+      
+      const currentIndex = currentImageIndex[selectedAd.id] || 0;
+      const totalImages = selectedAd.images.length;
+      
+      if (e.key === 'ArrowLeft' && currentIndex > 0) {
+        e.preventDefault();
+        prevImage(selectedAd.id, totalImages);
+      } else if (e.key === 'ArrowRight' && currentIndex < totalImages - 1) {
+        e.preventDefault();
+        nextImage(selectedAd.id, totalImages);
+      }
+    };
+
+    if (selectedAd) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [selectedAd, currentImageIndex]);
+
+  const shareAd = (ad: any) => {
+    if (navigator.share) {
+      navigator.share({
+        title: ad.title,
+        text: ad.description,
+        url: window.location.href
+      }).catch(console.error);
+    } else {
+      const shareText = `${ad.title}\n\n${ad.description}\n\nالسعر: ${formatPrice(ad.price)}\n\nشارك من حراج عدن`;
+      navigator.clipboard.writeText(shareText).then(() => {
+        alert('تم نسخ نص المشاركة إلى الحافظة!');
+      }).catch(() => {
+        alert(`شارك هذا الإعلان:\n\n${shareText}`);
+      });
+    }
+  };
+
+  const shareToWhatsApp = (ad: any) => {
+    const message = `مرحباً! أريد أن أشاركك هذا الإعلان من حراج عدن:\n\n${ad.title}\n\n${ad.description}\n\nالسعر: ${formatPrice(ad.price)}\n\nرابط الإعلان: ${window.location.href}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const openAdDetails = (ad: Ad) => {
+    console.log('Opening ad details for:', ad.title); // للتأكد من عمل الدالة
+    console.log('Ad data:', ad); // للتأكد من البيانات
+    setSelectedAd(ad);
+    setShowAdDetails(true);
+    console.log('showAdDetails set to true'); // للتأكد من تغيير الحالة
+  };
+
+  // دوال التعامل مع الصور
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newImages = Array.from(files).slice(0, 3 - newAdForm.images.length);
+      setNewAdForm(prev => ({
+        ...prev,
+        images: [...prev.images, ...newImages]
+      }));
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setNewAdForm(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+  };
+
+  const getImagePreview = (file: File): string => {
+    return URL.createObjectURL(file);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+      <AppHeader />
+      
+      <div className="container mx-auto px-4 py-4 max-w-md sm:max-w-2xl lg:max-w-6xl">
+        {/* بطاقة ترحيبية محسنة */}
+        <div className="mb-8">
+          <Card className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border border-white/20 relative overflow-hidden">
+            {/* خلفية متحركة */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-transparent to-purple-500/10 animate-pulse"></div>
+            
+            <CardContent className="p-6 text-center relative z-10">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-2xl transform hover:scale-110 transition-transform duration-300">
+                  <Store className="w-10 h-10 text-white" />
+                </div>
+              </div>
+              <h1 className="text-3xl font-bold text-white mb-3 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+                مرحباً بك في حراج عدن
+              </h1>
+              <p className="text-blue-100 text-base leading-relaxed mb-6 max-w-2xl mx-auto">
+                منصة بيع وشراء الأجهزة والسلع المستعملة في مدينة عدن
+                <br />
+                اكتشف آلاف الإعلانات المتنوعة وابحث عن ما تحتاجه
+              </p>
+              
+              {/* إحصائيات سريعة محسنة */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+                <div className="stats-card bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-all duration-300 group">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Store className="w-4 h-4 text-green-400" />
+                    </div>
+                    <div className="text-xs text-green-400 font-medium">+12%</div>
+                  </div>
+                  <div className="text-2xl font-bold text-white">{stats.totalAds}</div>
+                  <div className="text-xs text-blue-200">إعلان نشط</div>
+                </div>
+                
+                <div className="stats-card bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-all duration-300 group">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Tag className="w-4 h-4 text-blue-400" />
+                    </div>
+                    <div className="text-xs text-blue-400 font-medium">متنوع</div>
+                  </div>
+                  <div className="text-2xl font-bold text-white">{stats.totalCategories}</div>
+                  <div className="text-xs text-blue-200">فئة</div>
+                </div>
+                
+                <div className="stats-card bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-all duration-300 group">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <MapPin className="w-4 h-4 text-purple-400" />
+                    </div>
+                    <div className="text-xs text-purple-400 font-medium">عدن</div>
+                  </div>
+                  <div className="text-2xl font-bold text-white">{stats.totalDistricts}</div>
+                  <div className="text-xs text-blue-200">مديرية</div>
+                </div>
+                
+                <div className="stats-card bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:bg-white/15 transition-all duration-300 group">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Star className="w-4 h-4 text-orange-400" />
+                    </div>
+                    <div className="text-xs text-orange-400 font-medium animate-pulse">مميز</div>
+                  </div>
+                  <div className="text-2xl font-bold text-white">{stats.featuredAds}</div>
+                  <div className="text-xs text-blue-200">إعلان مميز</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* الفئات محسنة */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-white">الأقسام</h2>
+            <div className="flex items-center gap-2 text-sm text-blue-300">
+              <Filter className="w-4 h-4" />
+              <span>فلترة سريعة</span>
+            </div>
+          </div>
+          
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+            <div
+              className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide"
+              dir="ltr"
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                WebkitScrollbar: { display: 'none' }
+              }}
+            >
+            {PRODUCT_CATEGORIES.map((category, index) => {
+              const IconComponent = category.icon;
+              const adCount = allAds.filter(ad => ad.category === category.id).length;
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={`category-button flex flex-col items-center p-3 rounded-2xl transition-all duration-300 min-w-[80px] flex-shrink-0 group ${
+                    selectedCategory === category.id
+                      ? 'bg-white/20 backdrop-blur-sm border border-white/30 shadow-lg scale-105'
+                      : 'hover:bg-white/10 hover:scale-105'
+                  }`}
+                  style={{
+                    animationDelay: `${index * 100}ms`,
+                    animation: 'fadeInUp 0.6s ease-out forwards'
+                  }}
+                >
+                  {/* الأيقونة */}
+                  <div className={`w-14 h-14 ${category.color} rounded-2xl flex items-center justify-center mb-3 shadow-lg group-hover:shadow-xl transition-all duration-300`}>
+                    <IconComponent className="w-7 h-7 text-white" />
+                  </div>
+                  
+                  {/* النص */}
+                  <div className="text-center">
+                    <div className="text-xs font-semibold text-white leading-tight mb-1">
+                      {category.name}
+                    </div>
+                    <div className="text-xs text-blue-200 bg-blue-500/20 px-2 py-1 rounded-full">
+                      {adCount} إعلان
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* شريط البحث والفلترة محسن */}
+        <Card className="mb-8 bg-white/10 backdrop-blur-sm border-white/20 shadow-xl">
+          <CardContent className="p-3 sm:p-4">
+            <div className="space-y-3 sm:space-y-4">
+              {/* البحث - محسن للهواتف */}
+              <div className="search-container relative">
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/70 w-4 h-4" />
+                <Input
+                  placeholder="ابحث عن سلعة أو جهاز..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onFocus={() => setShowSuggestions(searchQuery.length > 1)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                  className="pr-10 bg-white/90 text-gray-900 placeholder-gray-500 border-white/30 focus:border-white/50 h-12 text-base"
+                />
+                
+                {/* اقتراحات البحث */}
+                {showSuggestions && (searchSuggestions.length > 0 || recentSearches.length > 0) && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white/95 backdrop-blur-sm border border-white/30 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                    {searchSuggestions.length > 0 && (
+                      <div className="p-2">
+                        <div className="text-xs text-gray-500 mb-2 px-2">اقتراحات</div>
+                        {searchSuggestions.map((suggestion, index) => (
+                          <button
+                            key={index}
+                            onClick={() => {
+                              setSearchQuery(suggestion);
+                              setShowSuggestions(false);
+                              addToRecentSearches(suggestion);
+                            }}
+                            className="w-full text-right px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded-md transition-colors"
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {recentSearches.length > 0 && (
+                      <div className="p-2 border-t border-gray-200">
+                        <div className="text-xs text-gray-500 mb-2 px-2">البحث الأخير</div>
+                        {recentSearches.map((search, index) => (
+                          <button
+                            key={index}
+                            onClick={() => {
+                              setSearchQuery(search);
+                              setShowSuggestions(false);
+                            }}
+                            className="w-full text-right px-3 py-2 text-sm text-gray-600 hover:bg-blue-50 rounded-md transition-colors flex items-center justify-between"
+                          >
+                            <span>{search}</span>
+                            <Trash2 
+                              className="w-3 h-3 text-gray-400 hover:text-red-500"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setRecentSearches(prev => prev.filter((_, i) => i !== index));
+                              }}
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* الفلاتر الأساسية - محسنة للهواتف */}
+              <div className="space-y-3">
+                {/* الصف الأول: فلاتر وترتيب */}
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                  <Button
+                    variant={showFilters ? "default" : "outline"}
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={`flex items-center justify-center gap-2 flex-1 sm:flex-none ${
+                      showFilters 
+                        ? 'bg-white/20 text-white border-white/30' 
+                        : 'bg-white/10 text-white border-white/20 hover:bg-white/15'
+                    }`}
+                    size="sm"
+                  >
+                    <Filter className="w-4 h-4" />
+                    فلاتر
+                  </Button>
+                  
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="flex-1 sm:flex-none px-3 py-2 border border-white/30 rounded-lg text-sm bg-white/90 text-gray-900 focus:border-white/50 focus:outline-none h-9"
+                  >
+                    <option value="newest">الأحدث</option>
+                    <option value="oldest">الأقدم</option>
+                    <option value="price_low">السعر: من الأقل</option>
+                    <option value="price_high">السعر: من الأعلى</option>
+                    <option value="views">الأكثر مشاهدة</option>
+                    <option value="featured">المميزة أولاً</option>
+                  </select>
+                </div>
+                
+                {/* الصف الثاني: مسح الفلاتر */}
+                {(searchQuery || selectedCategory !== 'all' || selectedDistrict !== 'all') && (
+                  <div className="flex justify-center sm:justify-start">
+                    <Button
+                      variant="outline"
+                      onClick={clearAllFilters}
+                      className="bg-red-500/20 text-red-200 border-red-300 hover:bg-red-500/30 w-full sm:w-auto"
+                      size="sm"
+                    >
+                      <X className="w-4 h-4 ml-1" />
+                      مسح جميع الفلاتر
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* الفلاتر المتقدمة */}
+              {showFilters && (
+                <div className="space-y-4 p-3 sm:p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
+                  {/* الفئة والمديرية */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-white mb-2">الفئة</label>
+                      <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="w-full p-3 border border-white/30 rounded-lg text-sm bg-white/90 text-gray-900 focus:border-white/50 focus:outline-none h-11"
+                      >
+                        <option value="all">جميع الفئات</option>
+                        {PRODUCT_CATEGORIES.map(category => (
+                          <option key={category.id} value={category.id}>
+                            {category.name} ({category.count})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-semibold text-white mb-2">المديرية</label>
+                      <select
+                        value={selectedDistrict}
+                        onChange={(e) => setSelectedDistrict(e.target.value)}
+                        className="w-full p-3 border border-white/30 rounded-lg text-sm bg-white/90 text-gray-900 focus:border-white/50 focus:outline-none h-11"
+                      >
+                        <option value="all">جميع المديريات</option>
+                        {ADEN_DISTRICTS.map(district => (
+                          <option key={district.id} value={district.id}>
+                            {district.icon} {district.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* أزرار الإجراءات */}
+        <div className="mb-6 flex flex-col sm:flex-row gap-3">
+          <Button
+            onClick={() => setShowAdTypeSelection(true)}
+            className="flex-1 bg-gradient-to-r from-white/20 to-white/10 hover:from-white/30 hover:to-white/20 text-white py-3 rounded-lg font-medium border border-white/20"
+          >
+            <Plus className="w-5 h-5 ml-2" />
+            أضف إعلانك مجاناً
+          </Button>
+          
+          <Button
+            onClick={() => {
+              // يمكن إضافة صفحة المفضلة لاحقاً
+              alert(`لديك ${likedAds.size} إعلان في المفضلة`);
+            }}
+            className="flex-1 bg-gradient-to-r from-red-500/20 to-pink-500/20 hover:from-red-500/30 hover:to-pink-500/30 text-white py-3 rounded-lg font-medium border border-red-300/20"
+          >
+            <Heart className="w-5 h-5 ml-2 fill-current" />
+            المفضلة ({likedAds.size})
+          </Button>
+        </div>
+
+        {/* قائمة الإعلانات */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold text-white">
+              منتجات مميزة ({filteredAds.length})
+            </h3>
+            {selectedCategory !== 'all' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedCategory('all')}
+                className="border-white/20 text-white hover:bg-white/10"
+              >
+                إزالة الفلتر
+              </Button>
+            )}
+          </div>
+
+          {filteredAds.length === 0 ? (
+            <Card className="p-8 text-center bg-white/10 backdrop-blur-sm border-white/20">
+              <Store className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-white mb-2">
+                لا توجد إعلانات
+              </h3>
+              <p className="text-blue-100 mb-4">
+                جرب تغيير معايير البحث أو أضف إعلانك الأول
+              </p>
+              <Button
+                onClick={() => setShowAddAd(true)}
+                className="bg-white/20 hover:bg-white/30 text-white border border-white/20"
+              >
+                أضف إعلان
+              </Button>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredAds.map((ad: any) => {
+                const category = PRODUCT_CATEGORIES.find((c: any) => c.id === ad.category);
+                const district = ADEN_DISTRICTS.find((d: any) => d.id === ad.district);
+                        const IconComponent = category?.icon || Store;
+                        
+                        return (
+                            <AdCard
+                    key={ad.id}
+                              ad={ad}
+                              category={category}
+                              district={district}
+                              IconComponent={IconComponent}
+                    isNewAd={isNewAd}
+                    isExpiringAd={isExpiringAd}
+                    likedAds={likedAds}
+                    onLike={handleLike}
+                    onShare={handleShare}
+                    onView={handleViewAd}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* نصائح الأمان */}
+        <Card className="mt-8 bg-yellow-500/20 border-yellow-400/30 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-yellow-200">
+              <Shield className="w-5 h-5" />
+              نصائح الأمان
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-yellow-100">
+            <ul className="space-y-2">
+              <li>• تأكد من فحص السلعة شخصياً قبل الشراء</li>
+              <li>• لا تدفع مبلغاً مقدماً قبل رؤية السلعة</li>
+              <li>• قابل البائع في مكان عام وآمن</li>
+              <li>• احتفظ بسجل للمحادثات والاتفاقيات</li>
+              <li>• إذا كان السعر يبدو جيداً جداً، كن حذراً</li>
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
+
+        {/* نافذة إضافة إعلان */}
+        {showAddAd && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-slate-800 to-blue-900 border-white/20">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-white text-xl">إضافة إعلان جديد</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAddAd(false)}
+                  className="text-white hover:bg-white/10"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                {/* عنوان الإعلان */}
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">عنوان الإعلان *</label>
+                  <Input
+                    placeholder="مثال: آيفون 13 برو ماكس - حالة ممتازة"
+                    value={newAdForm.title}
+                    onChange={(e) => setNewAdForm(prev => ({ ...prev, title: e.target.value }))}
+                    className="bg-white/90 text-gray-900 placeholder-gray-500 border-white/30 focus:border-white/50"
+                  />
+                  {formErrors.title && <p className="text-red-300 text-sm mt-1">{formErrors.title}</p>}
+                </div>
+
+                {/* الوصف */}
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">وصف الإعلان *</label>
+                  <textarea
+                    placeholder="اكتب وصفاً مفصلاً عن السلعة..."
+                    value={newAdForm.description}
+                    onChange={(e) => setNewAdForm(prev => ({ ...prev, description: e.target.value }))}
+                    rows={4}
+                    className="w-full p-3 border border-white/30 rounded-lg text-sm bg-white/90 text-gray-900 placeholder-gray-500 focus:border-white/50 focus:outline-none resize-none"
+                  />
+                  {formErrors.description && <p className="text-red-300 text-sm mt-1">{formErrors.description}</p>}
+                </div>
+
+                {/* السعر */}
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">السعر (ريال يمني) *</label>
+                  <Input
+                    type="number"
+                    placeholder="مثال: 450000"
+                    value={newAdForm.price}
+                    onChange={(e) => setNewAdForm(prev => ({ ...prev, price: e.target.value }))}
+                    className="bg-white/90 text-gray-900 placeholder-gray-500 border-white/30 focus:border-white/50"
+                  />
+                  {formErrors.price && <p className="text-red-300 text-sm mt-1">{formErrors.price}</p>}
+                </div>
+
+                {/* الفئة والمديرية */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">الفئة *</label>
+                    <select
+                      value={newAdForm.category}
+                      onChange={(e) => setNewAdForm(prev => ({ ...prev, category: e.target.value }))}
+                      className="w-full p-3 border border-white/30 rounded-lg text-sm bg-white/90 text-gray-900 focus:border-white/50 focus:outline-none"
+                    >
+                      <option value="">اختر الفئة</option>
+                      {PRODUCT_CATEGORIES.map(category => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                    {formErrors.category && <p className="text-red-300 text-sm mt-1">{formErrors.category}</p>}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">المديرية *</label>
+                    <select
+                      value={newAdForm.district}
+                      onChange={(e) => setNewAdForm(prev => ({ ...prev, district: e.target.value }))}
+                      className="w-full p-3 border border-white/30 rounded-lg text-sm bg-white/90 text-gray-900 focus:border-white/50 focus:outline-none"
+                    >
+                      <option value="">اختر المديرية</option>
+                      {ADEN_DISTRICTS.map(district => (
+                        <option key={district.id} value={district.id}>
+                        {district.name}
+                        </option>
+                      ))}
+                    </select>
+                    {formErrors.district && <p className="text-red-300 text-sm mt-1">{formErrors.district}</p>}
+                  </div>
+                </div>
+
+              {/* الحالة */}
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">حالة السلعة *</label>
+                    <select
+                      value={newAdForm.condition}
+                      onChange={(e) => setNewAdForm(prev => ({ ...prev, condition: e.target.value }))}
+                      className="w-full p-3 border border-white/30 rounded-lg text-sm bg-white/90 text-gray-900 focus:border-white/50 focus:outline-none"
+                    >
+                      <option value="">اختر الحالة</option>
+                  <option value="new">جديد</option>
+                  <option value="excellent">ممتاز</option>
+                  <option value="good">جيد</option>
+                  <option value="fair">مقبول</option>
+                    </select>
+                    {formErrors.condition && <p className="text-red-300 text-sm mt-1">{formErrors.condition}</p>}
+                  </div>
+
+              {/* رقم الاتصال */}
+                  <div>
+                <label className="block text-sm font-semibold text-white mb-2">رقم الاتصال *</label>
+                  <Input
+                  placeholder="مثال: 777123456"
+                    value={newAdForm.contactNumber}
+                    onChange={(e) => setNewAdForm(prev => ({ ...prev, contactNumber: e.target.value }))}
+                    className="bg-white/90 text-gray-900 placeholder-gray-500 border-white/30 focus:border-white/50"
+                  />
+                  {formErrors.contactNumber && <p className="text-red-300 text-sm mt-1">{formErrors.contactNumber}</p>}
+                </div>
+
+              {/* قابل للتفاوض */}
+              <div className="flex items-center gap-2">
+                      <input
+                  type="checkbox"
+                  id="negotiable"
+                  checked={newAdForm.negotiable}
+                  onChange={(e) => setNewAdForm(prev => ({ ...prev, negotiable: e.target.checked }))}
+                  className="w-4 h-4 text-blue-600 bg-white/90 border-white/30 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="negotiable" className="text-sm text-white">
+                  السعر قابل للتفاوض
+                      </label>
+                </div>
+
+                {/* أزرار الإجراءات */}
+              <div className="flex gap-3 pt-4">
+                  <Button
+                  onClick={handleSubmitAd}
+                  disabled={isLoading}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  >
+                  {isLoading ? 'جاري النشر...' : 'نشر الإعلان'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowAddAd(false)}
+                  className="border-white/20 text-white hover:bg-white/10"
+                  >
+                    إلغاء
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+      {/* نافذة تفاصيل الإعلان */}
+        {showAdDetails && selectedAd && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-4">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <Card className="bg-gradient-to-br from-slate-800 to-blue-900 border-white/20">
+                    <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-white text-xl">{selectedAd.title}</CardTitle>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowAdDetails(false)}
+                        className="text-white hover:bg-white/10"
+                      >
+                        <X className="w-5 h-5" />
+                      </Button>
+                    </CardHeader>
+                    
+            <CardContent className="space-y-4">
+              {/* معرض الصور */}
+              {selectedAd.images && selectedAd.images.length > 0 && (
+                <div className="relative h-80 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center text-6xl">
+                    {selectedAd.images[currentImageIndex[selectedAd.id] || 0]}
+                          </div>
+                  
+                  {/* أسهم التنقل الكبيرة */}
+                  {selectedAd.images.length > 1 && (
+                    <>
+                      <Button
+                        size="lg"
+                        variant="secondary"
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 p-0 bg-black/50 backdrop-blur-sm border-white/30 hover:bg-black/70"
+                        onClick={() => prevImage(selectedAd.id, selectedAd.images.length)}
+                      >
+                        <ChevronLeft className="w-6 h-6 text-white" />
+                      </Button>
+                      
+                      <Button
+                        size="lg"
+                        variant="secondary"
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 p-0 bg-black/50 backdrop-blur-sm border-white/30 hover:bg-black/70"
+                        onClick={() => nextImage(selectedAd.id, selectedAd.images.length)}
+                      >
+                        <ChevronRightIcon className="w-6 h-6 text-white" />
+                      </Button>
+                    </>
+                  )}
+                  
+                  {/* عداد الصور */}
+                  {selectedAd.images.length > 1 && (
+                    <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white text-sm px-3 py-1 rounded-full">
+                      {(currentImageIndex[selectedAd.id] || 0) + 1} / {selectedAd.images.length}
+                    </div>
+                  )}
+                  
+                  {/* نقاط التنقل */}
+                  {selectedAd.images.length > 1 && (
+                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+                      {selectedAd.images.map((_, index) => (
+                        <button
+                          key={index}
+                          className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                            index === (currentImageIndex[selectedAd.id] || 0)
+                              ? 'bg-white' 
+                              : 'bg-white/50 hover:bg-white/70'
+                          }`}
+                          onClick={() => setCurrentImageIndex(prev => ({
+                            ...prev,
+                            [selectedAd.id]: index
+                          }))}
+                        />
+                      ))}
+                    </div>
+                  )}
+                            </div>
+                          )}
+                          
+              {/* السعر */}
+              <div className="text-center">
+                <div className="text-3xl font-bold text-green-400 mb-2">
+                  {selectedAd.price} ريال
+                            </div>
+                {selectedAd.negotiable && (
+                  <Badge className="bg-green-500 text-white">قابل للتفاوض</Badge>
+                          )}
+                        </div>
+                        
+              {/* الوصف */}
+              <div>
+                <h4 className="text-white font-semibold mb-2">الوصف</h4>
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  {selectedAd.description}
+                </p>
+                      </div>
+
+              {/* التفاصيل */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-white font-semibold mb-2">الفئة</h4>
+                  <p className="text-gray-300 text-sm">
+                    {PRODUCT_CATEGORIES.find(c => c.id === selectedAd.category)?.name || 'عام'}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="text-white font-semibold mb-2">المديرية</h4>
+                  <p className="text-gray-300 text-sm">
+                    {ADEN_DISTRICTS.find(d => d.id === selectedAd.district)?.name || 'عدن'}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="text-white font-semibold mb-2">الحالة</h4>
+                  <p className="text-gray-300 text-sm">{selectedAd.condition}</p>
+                </div>
+                <div>
+                  <h4 className="text-white font-semibold mb-2">تاريخ النشر</h4>
+                  <p className="text-gray-300 text-sm">
+                    {new Date(selectedAd.postedAt).toLocaleDateString('ar-SA')}
+                  </p>
+                </div>
+              </div>
+
+              {/* أزرار الاتصال */}
+              <div className="flex gap-3 pt-4">
+                  <Button 
+                  onClick={() => window.open(`tel:${selectedAd.contactNumber}`)}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  >
+                  <Phone className="w-4 h-4 ml-2" />
+                  اتصال
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                  onClick={() => shareToWhatsApp(selectedAd)}
+                  className="border-white/20 text-white hover:bg-white/10"
+                  >
+                  <MessageCircle className="w-4 h-4 ml-2" />
+                  واتساب
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* الإعلانات المشابهة - أسفل نافذة التفاصيل */}
+          {getSimilarAds(selectedAd).length > 0 && (
+            <Card className="mt-4 w-full max-w-2xl bg-gradient-to-br from-slate-800 to-blue-900 border-white/20">
+              <CardHeader>
+                <CardTitle className="text-white text-lg flex items-center gap-2">
+                  <Store className="w-5 h-5" />
+                  إعلانات مشابهة
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-3">
+                  {getSimilarAds(selectedAd).map((similarAd) => {
+                    const category = PRODUCT_CATEGORIES.find((c: any) => c.id === similarAd.category);
+                    const district = ADEN_DISTRICTS.find((d: any) => d.id === similarAd.district);
+                    const IconComponent = category?.icon || Store;
+                    
+                    return (
+                      <AdCard
+                        key={similarAd.id}
+                        ad={similarAd}
+                        category={category}
+                        district={district}
+                        IconComponent={IconComponent}
+                        isNewAd={isNewAd}
+                        isExpiringAd={isExpiringAd}
+                        likedAds={likedAds}
+                        onLike={handleLike}
+                        onShare={handleShare}
+                        onView={handleViewAd}
+                      />
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+        )}
+      )}
+      </div>
+      
+      <AppFooter />
+    </div>
+  );
+}

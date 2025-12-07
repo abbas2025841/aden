@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../.gradle"
+		},
+		{
+			"path": "../../../../../.idea"
+		},
+		{
+			"path": "../../../../../abbasapp"
+		},
+		{
+			"path": "../../../../../AdenLiveApp"
+		},
+		{
+			"path": "../../../.."
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "AdenLiveApp-Complete",
+		"powershell.cwd": ".gradle"
+	}
+}

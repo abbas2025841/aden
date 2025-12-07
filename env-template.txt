@@ -1,0 +1,38 @@
+# متغيرات البيئة لتطبيق عدن لايف
+# Aden Live App Environment Variables
+
+# ===== قاعدة البيانات =====
+# Supabase Database
+DATABASE_URL=postgresql://postgres:[YOUR_PASSWORD]@db.[YOUR_PROJECT_ID].supabase.co:5432/postgres
+VITE_SUPABASE_URL=https://[YOUR_PROJECT_ID].supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# ===== API Keys =====
+# Google Maps API
+VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+
+# Currency Exchange APIs
+VITE_FIXER_API_KEY=your_fixer_api_key_here
+VITE_EXCHANGE_RATE_API_KEY=your_exchange_rate_api_key_here
+VITE_CURRENCY_LAYER_API_KEY=your_currency_layer_api_key_here
+
+# ===== إعدادات التطبيق =====
+NODE_ENV=development
+PORT=3020
+VITE_APP_NAME=Aden Live
+VITE_APP_VERSION=2.20.0
+
+# ===== إعدادات قاعدة البيانات =====
+DB_HOST=db.[YOUR_PROJECT_ID].supabase.co
+DB_PORT=5432
+DB_NAME=postgres
+DB_USER=postgres
+DB_PASSWORD=[YOUR_PASSWORD]
+
+# ===== إعدادات الأمان =====
+JWT_SECRET=your_jwt_secret_here
+SESSION_SECRET=your_session_secret_here
+
+# ===== إعدادات التطوير =====
+VITE_DEBUG=true
+VITE_LOG_LEVEL=info

@@ -1,0 +1,362 @@
+/* إمكانية الوصول - عدن لايف */
+
+/* RTL Support */
+.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+.rtl .flex {
+  flex-direction: row-reverse;
+}
+
+.rtl .space-x-2 > * + * {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+
+.rtl .space-x-4 > * + * {
+  margin-left: 0;
+  margin-right: 1rem;
+}
+
+.rtl .ml-2 {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+
+.rtl .mr-2 {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+/* High Contrast Mode */
+.high-contrast {
+  --color-primary: #0000FF;
+  --color-secondary: #008000;
+  --color-success: #00FF00;
+  --color-warning: #FFFF00;
+  --color-error: #FF0000;
+  --color-text: #000000;
+  --color-background: #FFFFFF;
+}
+
+.high-contrast * {
+  border-color: currentColor !important;
+}
+
+.high-contrast button,
+.high-contrast input,
+.high-contrast select,
+.high-contrast textarea {
+  border: 2px solid currentColor !important;
+}
+
+/* Reduced Motion */
+.reduced-motion * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+.reduced-motion .animate-spin {
+  animation: none !important;
+}
+
+.reduced-motion .animate-pulse {
+  animation: none !important;
+}
+
+.reduced-motion .animate-bounce {
+  animation: none !important;
+}
+
+/* Large Text */
+.large-text {
+  font-size: calc(1rem * var(--font-size-multiplier, 1.25));
+}
+
+.large-text h1 {
+  font-size: calc(2.25rem * var(--font-size-multiplier, 1.25));
+}
+
+.large-text h2 {
+  font-size: calc(1.875rem * var(--font-size-multiplier, 1.25));
+}
+
+.large-text h3 {
+  font-size: calc(1.5rem * var(--font-size-multiplier, 1.25));
+}
+
+.large-text .text-sm {
+  font-size: calc(0.875rem * var(--font-size-multiplier, 1.25));
+}
+
+.large-text .text-xs {
+  font-size: calc(0.75rem * var(--font-size-multiplier, 1.25));
+}
+
+/* Focus Visible */
+.focus-visible *:focus {
+  outline: 3px solid #0066FF !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.3) !important;
+}
+
+.focus-visible button:focus,
+.focus-visible input:focus,
+.focus-visible select:focus,
+.focus-visible textarea:focus,
+.focus-visible a:focus {
+  outline: 3px solid #0066FF !important;
+  outline-offset: 2px !important;
+}
+
+/* Skip Links */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #000;
+  color: #fff;
+  padding: 8px;
+  text-decoration: none;
+  z-index: 1000;
+  border-radius: 4px;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Screen Reader Only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ARIA Live Regions */
+.aria-live {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Keyboard Navigation */
+.keyboard-navigation *:focus {
+  outline: 2px solid #0066FF;
+  outline-offset: 2px;
+}
+
+/* Touch Targets */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Color Contrast Improvements */
+.text-contrast-high {
+  color: #000000;
+}
+
+.bg-contrast-high {
+  background-color: #FFFFFF;
+}
+
+.border-contrast-high {
+  border-color: #000000;
+}
+
+/* Form Accessibility */
+.form-field {
+  position: relative;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #D1D5DB;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  outline: none;
+  border-color: #0066FF;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+}
+
+.form-field .error {
+  color: #DC2626;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.form-field .help-text {
+  color: #6B7280;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Button Accessibility */
+.btn-accessible {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.btn-accessible:focus {
+  outline: 3px solid #0066FF;
+  outline-offset: 2px;
+}
+
+.btn-accessible:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Card Accessibility */
+.card-accessible {
+  border: 1px solid #E5E7EB;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  background: #FFFFFF;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card-accessible:focus-within {
+  outline: 2px solid #0066FF;
+  outline-offset: 2px;
+}
+
+/* List Accessibility */
+.list-accessible {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.list-accessible li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.list-accessible li:last-child {
+  border-bottom: none;
+}
+
+.list-accessible li:focus {
+  background-color: #F3F4F6;
+  outline: 2px solid #0066FF;
+  outline-offset: -2px;
+}
+
+/* Modal Accessibility */
+.modal-accessible {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-accessible .modal-content {
+  background: #FFFFFF;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+.modal-accessible .modal-content:focus {
+  outline: none;
+}
+
+/* Table Accessibility */
+.table-accessible {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #E5E7EB;
+}
+
+.table-accessible th,
+.table-accessible td {
+  padding: 0.75rem;
+  text-align: right;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.table-accessible th {
+  background-color: #F9FAFB;
+  font-weight: 600;
+}
+
+.table-accessible tr:focus {
+  background-color: #F3F4F6;
+  outline: 2px solid #0066FF;
+  outline-offset: -2px;
+}
+
+/* Responsive Accessibility */
+@media (max-width: 768px) {
+  .touch-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  .btn-accessible {
+    min-height: 48px;
+    padding: 1rem 1.5rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .skip-link,
+  .aria-live,
+  .sr-only {
+    display: none !important;
+  }
+  
+  .focus-visible *:focus {
+    outline: none !important;
+  }
+}

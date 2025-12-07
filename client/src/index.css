@@ -1,0 +1,208 @@
+/* stylelint-disable at-rule-no-unknown */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.25rem;
+  }
+
+  /* تخطيط شبكي محسن للإعلانات - أسلوب السوق المفتوح */
+  .ad-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateZ(0);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .ad-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.3);
+  }
+
+  .ad-card:active {
+    transform: translateY(-4px) scale(0.98);
+    transition-duration: 0.1s;
+  }
+
+  /* تحسين عرض الصور في البطاقات */
+  .ad-card .image-container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ad-card .image-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    z-index: 1;
+  }
+
+  /* تأثيرات للشارات والأزرار */
+  .ad-card .badge {
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .ad-card .favorite-btn {
+    backdrop-filter: blur(10px);
+    transition: all 0.2s ease;
+  }
+
+  .ad-card .favorite-btn:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  /* تحسين أزرار الإجراءات */
+  .ad-card .action-buttons {
+    gap: 0.5rem;
+  }
+
+  .ad-card .action-buttons button {
+    transition: all 0.2s ease;
+    font-weight: 600;
+  }
+
+  .ad-card .action-buttons button:hover {
+    transform: translateY(-1px);
+  }
+
+  /* تدرجات ملونة لبطاقات خدمات التطوير (مطابقة لتدرجات الرئيسية) */
+  .assistant-gradient {
+    background: var(--assistant-gradient);
+  }
+
+  .restaurants-gradient {
+    background: var(--restaurants-gradient);
+  }
+
+  .donations-gradient {
+    background: var(--donations-gradient);
+  }
+
+  .starlink-gradient {
+    background: var(--starlink-gradient);
+  }
+
+  .entertainment-gradient {
+    background: var(--entertainment-gradient);
+  }
+
+  .wallet-gradient {
+    background: var(--wallet-gradient);
+  }
+
+  /* تدرجات حديثة للبطاقات */
+  .ad-card-featured {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .ad-card-new {
+    border: 2px solid #3b82f6;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+
+  .ad-card-expiring {
+    border: 2px solid #f97316;
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
+  }
+
+  /* أيقونات ملونة */
+  .icon-phone {
+    color: #10b981;
+    filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3));
+  }
+
+  .icon-whatsapp {
+    color: #25d366;
+    filter: drop-shadow(0 2px 4px rgba(37, 211, 102, 0.3));
+  }
+}
+
+:root {
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(220 39% 11%);
+  --card: hsl(220 14% 96%);
+  --card-foreground: hsl(220 39% 11%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(220 39% 11%);
+  --primary: hsl(224 76% 48%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(220 14% 96%);
+  --secondary-foreground: hsl(220 39% 11%);
+  --muted: hsl(220 13% 91%);
+  --muted-foreground: hsl(220 9% 46%);
+  --accent: hsl(220 14% 96%);
+  --accent-foreground: hsl(220 39% 11%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(220 13% 91%);
+  --input: hsl(220 13% 95%);
+  --ring: hsl(224 76% 48%);
+  --radius: 1.3rem;
+
+  /* تدرجات البطاقات (من الصفحة الرئيسية) */
+  --assistant-gradient: linear-gradient(135deg, hsl(280 100% 92%) 0%, hsl(280 100% 98%) 100%);
+  --restaurants-gradient: linear-gradient(135deg, hsl(340 100% 92%) 0%, hsl(340 100% 98%) 100%);
+  --donations-gradient: linear-gradient(135deg, hsl(160 100% 92%) 0%, hsl(160 100% 98%) 100%);
+  --starlink-gradient: linear-gradient(135deg, hsl(200 100% 92%) 0%, hsl(200 100% 98%) 100%);
+  --entertainment-gradient: linear-gradient(135deg, hsl(330 100% 92%) 0%, hsl(330 100% 98%) 100%);
+  --wallet-gradient: linear-gradient(135deg, hsl(120 100% 92%) 0%, hsl(120 100% 98%) 100%);
+}
+
+.dark {
+  --background: hsl(222 47% 11%);
+  --foreground: hsl(200 6.6667% 91.1765%);
+  --card: hsl(228 9.8039% 10%);
+  --card-foreground: hsl(0 0% 85.0980%);
+  --popover: hsl(0 0% 0%);
+  --popover-foreground: hsl(200 6.6667% 91.1765%);
+  --primary: hsl(203.7736 87.6033% 52.5490%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(195.0000 15.3846% 94.9020%);
+  --secondary-foreground: hsl(210 25% 7.8431%);
+  --muted: hsl(0 0% 9.4118%);
+  --muted-foreground: hsl(210 3.3898% 46.2745%);
+  --accent: hsl(205.7143 70% 7.8431%);
+  --accent-foreground: hsl(203.7736 87.6033% 52.5490%);
+  --destructive: hsl(356.3033 90.5579% 54.3137%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(210 5.2632% 14.9020%);
+  --input: hsl(207.6923 27.6596% 18.4314%);
+  --ring: hsl(202.8169 89.1213% 53.1373%);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  body {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  input, select, textarea {
+    font-size: 16px !important;
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 8px;
+  }
+  
+  button, .btn {
+    min-height: 44px;
+    min-width: 44px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}

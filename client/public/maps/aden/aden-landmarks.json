@@ -1,0 +1,92 @@
+[
+  {
+    "id": "hospital_1",
+    "name": "مستشفى الجمهورية",
+    "type": "hospital",
+    "district": "كريتر",
+    "lat": 12.7794,
+    "lng": 45.0367,
+    "description": "المستشفى الرئيسي في عدن"
+  },
+  {
+    "id": "hospital_2",
+    "name": "مستشفى الصداقة",
+    "type": "hospital",
+    "district": "المعلا",
+    "lat": 12.8000,
+    "lng": 45.0000,
+    "description": "مستشفى الصداقة اليمنية السوفيتية"
+  },
+  {
+    "id": "school_1",
+    "name": "ثانوية عدن النموذجية",
+    "type": "school",
+    "district": "دار سعد",
+    "lat": 12.8273,
+    "lng": 44.9908,
+    "description": "أشهر مدرسة ثانوية في عدن"
+  },
+  {
+    "id": "mosque_1",
+    "name": "مسجد العيدروس",
+    "type": "mosque",
+    "district": "كريتر",
+    "lat": 12.7794,
+    "lng": 45.0369,
+    "description": "مسجد ومنارة العيدروس التاريخية"
+  },
+  {
+    "id": "water_1",
+    "name": "نقطة مياه الحي الصحي",
+    "type": "water",
+    "district": "كريتر",
+    "lat": 12.7794,
+    "lng": 45.0367,
+    "description": "نقطة مياه سبيل مجانية"
+  },
+  {
+    "id": "electricity_1",
+    "name": "محطة كهرباء عدن",
+    "type": "electricity",
+    "district": "التواهي",
+    "lat": 12.8200,
+    "lng": 45.0200,
+    "description": "المحطة الرئيسية للكهرباء"
+  },
+  {
+    "id": "government_1",
+    "name": "مبنى المحافظة",
+    "type": "government",
+    "district": "كريتر",
+    "lat": 12.7794,
+    "lng": 45.0367,
+    "description": "مبنى محافظة عدن"
+  },
+  {
+    "id": "market_1",
+    "name": "سوق العيدروس",
+    "type": "market",
+    "district": "كريتر",
+    "lat": 12.7794,
+    "lng": 45.0367,
+    "description": "السوق الرئيسي في كريتر"
+  },
+  {
+    "id": "restaurant_1",
+    "name": "مطعم الشاطئ",
+    "type": "restaurant",
+    "district": "المعلا",
+    "lat": 12.8000,
+    "lng": 45.0000,
+    "description": "مطعم مشهور على شاطئ المعلا"
+  },
+  {
+    "id": "water_2",
+    "name": "براد مياه مسجد الرحمة",
+    "type": "water",
+    "district": "الشيخ عثمان",
+    "lat": 12.7800,
+    "lng": 44.9800,
+    "description": "براد مياه خيري"
+  }
+]

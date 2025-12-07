@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" aria-label="Clock tower logo" role="img" preserveAspectRatio="xMidYMid meet">
+  <!-- background circle with subtle gradient (sea + sky) -->
+  <defs>
+    <linearGradient id="g-bg" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#7EC8FF"/>
+      <stop offset="1" stop-color="#1D9BE6"/>
+    </linearGradient>
+    <linearGradient id="g-roof" x1="0" x2="1">
+      <stop offset="0" stop-color="#FF4D4D"/>
+      <stop offset="1" stop-color="#D92B2B"/>
+    </linearGradient>
+    <pattern id="brick" patternUnits="userSpaceOnUse" width="4" height="4">
+      <rect width="4" height="4" fill="rgba(0,0,0,0)"/>
+      <path d="M0 2h4" stroke="#2b2b2b" stroke-width="0.5"/>
+    </pattern>
+    <filter id="f-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  
+  <!-- circular backdrop -->
+  <circle cx="24" cy="24" r="22" fill="url(#g-bg)"/>
+
+  <!-- stylized waves (foreground) -->
+  <path d="M2 36c4-3 8-3 12-1s8 1 12-1 8-3 12 1v9H2V36z" fill="#0f71a6" opacity="0.95"/>
+
+  <!-- tower body -->
+  <g transform="translate(18,6)">
+    <!-- shadow behind tower -->
+    <rect x="-1.2" y="8" width="12.8" height="26" rx="1.2" fill="#1f2a30" opacity="0.18" transform="translate(0.8,1.2)"/>
+    <!-- main tower (brick hint using pattern) -->
+    <rect x="0" y="6" width="10" height="26" rx="0.8" fill="#2b2b2b" fill-opacity="1"/>
+    <!-- brick overlay (subtle) -->
+    <rect x="0" y="6" width="10" height="26" rx="0.8" fill="url(#brick)" opacity="0.28"/>
+    <!-- vertical lighter strip (stone seam) -->
+    <rect x="4.6" y="6" width="0.9" height="26" fill="#171818" opacity="0.35"/>
+
+    <!-- clock face -->
+    <circle cx="5" cy="13" r="4.2" fill="#fff" stroke="#111" stroke-width="0.7"/>
+    <!-- clock ticks (simple) -->
+    <g transform="translate(5,13)" stroke="#0b0b0b" stroke-width="0.5" stroke-linecap="round">
+      <line x1="0" y1="-3.6" x2="0" y2="-2.2"/>
+      <line x1="3" y1="0" x2="1.8" y2="0"/>
+      <line x1="0" y1="3.6" x2="0" y2="2.2"/>
+      <line x1="-3" y1="0" x2="-1.8" y2="0"/>
+    </g>
+    <!-- clock hands -->
+    <g transform="translate(5,13)" stroke="#111" stroke-linecap="round">
+      <line x1="0" y1="0" x2="0" y2="-2.6" stroke-width="0.7"/>
+      <line x1="0" y1="0" x2="1.8" y2="0" stroke-width="0.6"/>
+      <circle cx="0" cy="0" r="0.35" fill="#111"/>
+    </g>
+
+    <!-- roof (red) -->
+    <path d="M-1 6 L5 -4 L11 6 Z" fill="url(#g-roof)" stroke="#c32222" stroke-width="0.45"/>
+  </g>
+
+  <!-- subtle outline / polish -->
+  <circle cx="24" cy="24" r="22" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="0.6"/>
+</svg>

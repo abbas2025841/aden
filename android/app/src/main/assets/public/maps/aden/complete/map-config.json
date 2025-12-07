@@ -1,0 +1,31 @@
+{
+  "name": "عدن - الخرائط المحلية",
+  "version": "1.0.0",
+  "description": "خرائط محلية لمدينة عدن للاستخدام بدون إنترنت",
+  "bounds": {
+    "north": 12.9,
+    "south": 12.7,
+    "east": 45.1,
+    "west": 44.9
+  },
+  "center": {
+    "lat": 12.8275,
+    "lng": 45.0367
+  },
+  "zoom": {
+    "min": 10,
+    "max": 18,
+    "default": 12
+  },
+  "tiles": {
+    "url": "/maps/aden/complete/tiles/{z}/{x}/{y}.png",
+    "attribution": "© OpenStreetMap contributors | عدن لايف",
+    "maxZoom": 18,
+    "minZoom": 10
+  },
+  "landmarks": {
+    "url": "/maps/aden/aden-landmarks.json",
+    "count": 10
+  },
+  "lastUpdated": "2024-01-01T00:00:00Z"
+}

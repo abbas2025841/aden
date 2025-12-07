@@ -1,0 +1,25 @@
+{
+  "name": "مزامنه العملات الصرف اليوم",
+  "version": "1.0.0",
+  "description": "نظام مزامنة أسعار العملات من عدن تايم مع قاعدة البيانات",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "sync": "node sync-currency.js",
+    "test": "node test-connection.js"
+  },
+  "keywords": ["currency", "sync", "aden", "exchange", "rates"],
+  "author": "Cursor الأسطوري",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "node-cron": "^3.0.3",
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

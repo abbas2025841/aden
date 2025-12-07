@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>عدن لايف - حلول ذكية لحياة أسهل</title>
+  <style>
+    /* CSS للصفحة الرئيسية مع الشريط الجانبي */
+
+    /* خطوط Google Fonts العربية */
+    @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&family=Tajawal:wght@200;300;400;500;700;800;900&display=swap");
+
+    /* إعدادات عامة */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Cairo", "Tajawal", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      direction: rtl;
+      text-align: right;
+      margin: 0;
+      padding: 0;
+      background-color: #f9fafb;
+      color: #1f2937;
+      line-height: 1.6;
+    }
+
+    /* تحسينات RTL */
+    .rtl-support {
+      direction: rtl;
+      text-align: right;
+    }
+
+    .rtl-support .space-x-3 > * + * {
+      margin-left: 0;
+      margin-right: 0.75rem;
+    }
+
+    .rtl-support .space-x-reverse > * + * {
+      margin-left: 0.75rem;
+      margin-right: 0;
+    }
+
+    /* الشريط الجانبي */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100vh;
+      width: 256px;
+      background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+      color: white;
+      z-index: 50;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-x: hidden;
+      box-shadow: 4px 0 6px -1px rgba(0, 0, 0, 0.1), 2px 0 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .sidebar.collapsed {
+      width: 64px;
+    }
+
+    /* رأس الشريط الجانبي */
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      border-bottom: 1px solid #374151;
+    }
+
+    .sidebar-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: white;
+      margin: 0;
+    }
+
+    .sidebar-toggle-btn {
+      padding: 0.5rem;
+      background-color: #374151;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    .sidebar-toggle-btn:hover {
+      background-color: #4b5563;
+    }
+
+    /* قائمة الشريط الجانبي */
+    .sidebar-nav {
+      margin-top: 1rem;
+      padding: 0 0.5rem;
+    }
+
+    .sidebar-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .sidebar-item {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar-item::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 3px;
+      height: 100%;
+      background: linear-gradient(180deg, #3b82f6, #14b8a6);
+      transform: scaleY(0);
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .sidebar-item.active::before {
+      transform: scaleY(1);
+    }
+
+    .sidebar-item:hover::before {
+      transform: scaleY(1);
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      text-decoration: none;
+      color: #d1d5db;
+    }
+
+    .sidebar-link:hover {
+      background-color: #374151;
+      color: white;
+    }
+
+    .sidebar-link.active {
+      background-color: #2563eb;
+      color: white;
+    }
+
+    .sidebar-link-content {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .sidebar-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar-text {
+      font-size: 0.875rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-badge {
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      flex-shrink: 0;
+    }
+
+    .badge-default {
+      background-color: #dbeafe;
+      color: #1e40af;
+    }
+
+    .badge-secondary {
+      background-color: #f3f4f6;
+      color: #374151;
+    }
+
+    .badge-destructive {
+      background-color: #fee2e2;
+      color: #dc2626;
+    }
+
+    /* المحتوى الرئيسي */
+    .main-content {
+      transition: margin-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-right: 256px;
+      min-height: 100vh;
+    }
+
+    .main-content.sidebar-collapsed {
+      margin-right: 64px;
+    }
+
+    /* رأس الصفحة */
+    .app-header {
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 1rem 0;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    }
+
+    .header-container {
+      max-width: 768px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0;
+    }
+
+    /* المحتوى الرئيسي */
+    .main-container {
+      max-width: 768px;
+      margin: 0 auto;
+      padding: 1rem;
+      padding-bottom: 4rem;
+    }
+
+    /* عرض الأقسام */
+    .section-display {
+      background: white;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #3b82f6 0%, #14b8a6 100%);
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      flex-shrink: 0;
+      font-size: 1.5rem;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0;
+    }
+
+    .section-description {
+      color: #6b7280;
+      margin: 0;
+    }
+
+    /* بطاقة المرافق الصحية */
+    .health-card {
+      background: #f2fff7;
+      border-right: 5px solid #00bf72;
+      border-radius: 10px 0 0 10px;
+      box-shadow: 0 3px 10px #00331a15;
+      padding: 18px 22px;
+      margin: 16px 0;
+      max-width: 320px;
+    }
+
+    .health-card h3 {
+      color: #069260;
+      margin: 0;
+    }
+
+    .health-card .badge {
+      color: #fff;
+      background: #22A699;
+      padding: 2px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 7px;
+      display: inline-block;
+    }
+
+    .health-card p {
+      color: #555;
+      margin: 12px 0 0 0;
+      font-size: 16px;
+    }
+
+    /* تذييل الصفحة */
+    .app-footer {
+      background: white;
+      border-top: 1px solid #e5e7eb;
+      padding: 2rem 0;
+      margin-top: 2rem;
+    }
+
+    .footer-container {
+      max-width: 768px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      text-align: center;
+    }
+
+    .footer-text {
+      color: #6b7280;
+      font-size: 0.875rem;
+      margin: 0;
+    }
+
+    /* تحسينات الاستجابة */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 64px;
+      }
+      
+      .sidebar.collapsed {
+        width: 64px;
+      }
+      
+      .main-content {
+        margin-right: 64px;
+      }
+      
+      .main-content.sidebar-collapsed {
+        margin-right: 64px;
+      }
+      
+      .sidebar-text {
+        display: none;
+      }
+      
+      .sidebar-badge {
+        display: none;
+      }
+      
+      .header-container {
+        padding: 0 0.5rem;
+      }
+      
+      .main-container {
+        padding: 0.5rem;
+      }
+      
+      .section-title {
+        font-size: 1.25rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .sidebar {
+        width: 56px;
+      }
+      
+      .main-content {
+        margin-right: 56px;
+      }
+      
+      .main-content.sidebar-collapsed {
+        margin-right: 56px;
+      }
+    }
+
+    /* تحسينات الوضع المظلم */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #111827;
+        color: #f9fafb;
+      }
+      
+      .app-header {
+        background: #1f2937;
+        border-bottom-color: #374151;
+      }
+      
+      .header-title {
+        color: #f9fafb;
+      }
+      
+      .section-display {
+        background: #1f2937;
+        border-color: #374151;
+      }
+      
+      .section-title {
+        color: #f9fafb;
+      }
+      
+      .section-description {
+        color: #d1d5db;
+      }
+      
+      .app-footer {
+        background: #1f2937;
+        border-top-color: #374151;
+      }
+      
+      .footer-text {
+        color: #d1d5db;
+      }
+    }
+
+    /* تأثيرات الحركة */
+    .page-transition {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .sidebar-transition {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .item-transition {
+      transition: all 0.2s ease-in-out;
+    }
+
+    /* تحسينات الخطوط العربية */
+    .arabic-text {
+      font-family: "Cairo", "Tajawal", sans-serif;
+      line-height: 1.6;
+      letter-spacing: 0.025em;
+    }
+
+    .arabic-text h1,
+    .arabic-text h2,
+    .arabic-text h3,
+    .arabic-text h4,
+    .arabic-text h5,
+    .arabic-text h6 {
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .arabic-text p {
+      line-height: 1.7;
+    }
+
+    /* تحسينات إضافية */
+    .safe-area-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .truncate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* تحسينات الأداء */
+    .sidebar,
+    .main-content,
+    .sidebar-link,
+    .section-display {
+      will-change: transform;
+    }
+
+    /* تحسينات إمكانية الوصول */
+    .sidebar-link:focus,
+    .sidebar-toggle-btn:focus {
+      outline: 2px solid #3b82f6;
+      outline-offset: 2px;
+    }
+
+    /* تحسينات الطباعة */
+    @media print {
+      .sidebar {
+        display: none;
+      }
+      
+      .main-content {
+        margin-right: 0;
+      }
+      
+      .app-header,
+      .app-footer {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body class="rtl-support arabic-text">
+
+  <!-- الشريط الجانبي -->
+  <aside class="sidebar sidebar-transition" id="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-title">الأقسام</span>
+      <button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="طي الشريط الجانبي">☰</button>
+    </div>
+    <nav class="sidebar-nav">
+      <ul class="sidebar-list">
+        <li class="sidebar-item active" data-section="home" onclick="showSection('home', this)">
+          <a class="sidebar-link sidebar-link-content">
+            <span class="sidebar-icon">🏠</span>
+            <span class="sidebar-text">الرئيسية</span>
+          </a>
+        </li>
+        <li class="sidebar-item" data-section="water" onclick="showSection('water', this)">
+          <a class="sidebar-link sidebar-link-content">
+            <span class="sidebar-icon">💧</span>
+            <span class="sidebar-text">ماء</span>
+          </a>
+        </li>
+        <li class="sidebar-item" data-section="electricity" onclick="showSection('electricity', this)">
+          <a class="sidebar-link sidebar-link-content">
+            <span class="sidebar-icon">💡</span>
+            <span class="sidebar-text">كهرباء</span>
+          </a>
+        </li>
+        <li class="sidebar-item" data-section="health" onclick="showSection('health', this)">
+          <a class="sidebar-link sidebar-link-content">
+            <span class="sidebar-icon">🩺</span>
+            <span class="sidebar-text">صحة</span>
+          </a>
+        </li>
+        <li class="sidebar-item" data-section="education" onclick="showSection('education', this)">
+          <a class="sidebar-link sidebar-link-content">
+            <span class="sidebar-icon">🎓</span>
+            <span class="sidebar-text">تعليم</span>
+          </a>
+        </li>
+        <li class="sidebar-item" data-section="jobs" onclick="showSection('jobs', this)">
+          <a class="sidebar-link sidebar-link-content">
+            <span class="sidebar-icon">💼</span>
+            <span class="sidebar-text">وظائف</span>
+          </a>
+        </li>
+        <li class="sidebar-item" data-section="currency" onclick="showSection('currency', this)">
+          <a class="sidebar-link sidebar-link-content">
+            <span class="sidebar-icon">💱</span>
+            <span class="sidebar-text">صرف اليوم الاسعار</span>
+          </a>
+        </li>
+        <li class="sidebar-item" data-section="assistant" onclick="showSection('assistant', this)">
+          <a class="sidebar-link sidebar-link-content">
+            <span class="sidebar-icon">🤖</span>
+            <span class="sidebar-text">عدني - مساعد عدن</span>
+          </a>
+        </li>
+        <li class="sidebar-item" data-section="settings" onclick="showSection('settings', this)">
+          <a class="sidebar-link sidebar-link-content">
+            <span class="sidebar-icon">⚙️</span>
+            <span class="sidebar-text">الإعدادات</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- محتوى الصفحة الرئيسية -->
+  <main class="main-content sidebar-transition" id="main-content">
+
+    <header class="app-header">
+      <div class="header-container">
+        <h1 class="header-title">عدن لايف - حلول ذكية لحياة أسهل</h1>
+      </div>
+    </header>
+
+    <section class="main-container">
+
+      <!-- الرئيسية -->
+      <div class="section-display page-transition" id="home-section" style="display: block;">
+        <div class="section-header">
+          <div class="section-icon">🏠</div>
+          <div>
+            <h2 class="section-title">الرئيسية</h2>
+            <p class="section-description">مرحبًا بك في منصة عدن لايف</p>
+          </div>
+        </div>
+        <div style="text-align: center; padding: 2rem;">
+          <h3 style="color: #3b82f6; margin-bottom: 1rem;">مرحباً بك في عدن لايف</h3>
+          <p style="color: #6b7280; margin-bottom: 2rem;">منصة شاملة لجميع الخدمات في عدن</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem;">
+            <div style="background: #f0f9ff; padding: 1rem; border-radius: 0.5rem; border-right: 3px solid #3b82f6;">
+              <h4 style="color: #1e40af; margin: 0 0 0.5rem 0;">خدمات سريعة</h4>
+              <p style="color: #374151; margin: 0; font-size: 0.875rem;">وصول سهل لجميع الخدمات</p>
+            </div>
+            <div style="background: #f0fdf4; padding: 1rem; border-radius: 0.5rem; border-right: 3px solid #22c55e;">
+              <h4 style="color: #15803d; margin: 0 0 0.5rem 0;">معلومات محدثة</h4>
+              <p style="color: #374151; margin: 0; font-size: 0.875rem;">أحدث المعلومات والبيانات</p>
+            </div>
+            <div style="background: #fef3c7; padding: 1rem; border-radius: 0.5rem; border-right: 3px solid #f59e0b;">
+              <h4 style="color: #d97706; margin: 0 0 0.5rem 0;">دعم 24/7</h4>
+              <p style="color: #374151; margin: 0; font-size: 0.875rem;">مساعد ذكي متاح دائماً</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ماء -->
+      <div class="section-display page-transition" id="water-section" style="display: none;">
+        <div class="section-header">
+          <div class="section-icon">💧</div>
+          <div>
+            <h2 class="section-title">ماء</h2>
+            <p class="section-description">خدمات المياه والتحلية والصرف الصحي</p>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+          <div style="background: #f0f9ff; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #3b82f6;">
+            <h3 style="color: #1e40af; margin: 0 0 1rem 0;">مصادر المياه</h3>
+            <ul style="color: #374151; margin: 0; padding-right: 1rem;">
+              <li>محطات التحلية</li>
+              <li>الآبار الجوفية</li>
+              <li>خزانات المياه</li>
+            </ul>
+          </div>
+          <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #22c55e;">
+            <h3 style="color: #15803d; margin: 0 0 1rem 0;">خدمات الصرف</h3>
+            <ul style="color: #374151; margin: 0; padding-right: 1rem;">
+              <li>شبكات الصرف الصحي</li>
+              <li>صيانة الأنابيب</li>
+              <li>خدمات الطوارئ</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- كهرباء -->
+      <div class="section-display page-transition" id="electricity-section" style="display: none;">
+        <div class="section-header">
+          <div class="section-icon">💡</div>
+          <div>
+            <h2 class="section-title">كهرباء</h2>
+            <p class="section-description">خدمات الكهرباء والمولدات والطاقة الشمسية</p>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+          <div style="background: #fef3c7; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #f59e0b;">
+            <h3 style="color: #d97706; margin: 0 0 1rem 0;">الشبكة العامة</h3>
+            <p style="color: #374151; margin: 0;">حالة الشبكة الكهربائية العامة</p>
+            <div style="margin-top: 1rem;">
+              <span style="background: #22c55e; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem;">متاح</span>
+            </div>
+          </div>
+          <div style="background: #f0f9ff; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #3b82f6;">
+            <h3 style="color: #1e40af; margin: 0 0 1rem 0;">المولدات</h3>
+            <p style="color: #374151; margin: 0;">معلومات عن المولدات الخاصة</p>
+            <div style="margin-top: 1rem;">
+              <span style="background: #3b82f6; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem;">نشط</span>
+            </div>
+          </div>
+          <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #22c55e;">
+            <h3 style="color: #15803d; margin: 0 0 1rem 0;">الطاقة الشمسية</h3>
+            <p style="color: #374151; margin: 0;">حلول الطاقة المتجددة</p>
+            <div style="margin-top: 1rem;">
+              <span style="background: #22c55e; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem;">متاح</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- صحة (المرافق الصحية) -->
+      <div class="section-display page-transition" id="health-section" style="display: none;">
+        <div class="section-header">
+          <div class="section-icon">🩺</div>
+          <div>
+            <h2 class="section-title">المرافق الصحية</h2>
+            <p class="section-description">مرافق متاحة</p>
+          </div>
+        </div>
+        <!-- بطاقة مرافق صحية -->
+        <div class="health-card">
+          <h3>المرافق الصحية</h3>
+          <span class="badge">مرافق متاحة</span>
+          <p>مستشفيات وصيدليات وعيادات</p>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+          <div style="background: #fef2f2; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #ef4444;">
+            <h3 style="color: #dc2626; margin: 0 0 1rem 0;">المستشفيات</h3>
+            <ul style="color: #374151; margin: 0; padding-right: 1rem;">
+              <li>مستشفى الجمهورية</li>
+              <li>مستشفى الصداقة</li>
+              <li>مستشفى الثورة</li>
+            </ul>
+          </div>
+          <div style="background: #f0f9ff; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #3b82f6;">
+            <h3 style="color: #1e40af; margin: 0 0 1rem 0;">الصيدليات</h3>
+            <ul style="color: #374151; margin: 0; padding-right: 1rem;">
+              <li>صيدليات 24 ساعة</li>
+              <li>صيدليات متخصصة</li>
+              <li>خدمة التوصيل</li>
+            </ul>
+          </div>
+          <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #22c55e;">
+            <h3 style="color: #15803d; margin: 0 0 1rem 0;">العيادات</h3>
+            <ul style="color: #374151; margin: 0; padding-right: 1rem;">
+              <li>عيادات عامة</li>
+              <li>عيادات متخصصة</li>
+              <li>عيادات أسنان</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- تعليم -->
+      <div class="section-display page-transition" id="education-section" style="display: none;">
+        <div class="section-header">
+          <div class="section-icon">🎓</div>
+          <div>
+            <h2 class="section-title">تعليم</h2>
+            <p class="section-description">خدمات المدارس والمعاهد والجامعات</p>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+          <div style="background: #f0f9ff; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #3b82f6;">
+            <h3 style="color: #1e40af; margin: 0 0 1rem 0;">المدارس</h3>
+            <ul style="color: #374151; margin: 0; padding-right: 1rem;">
+              <li>مدارس حكومية</li>
+              <li>مدارس خاصة</li>
+              <li>مدارس دولية</li>
+            </ul>
+          </div>
+          <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #22c55e;">
+            <h3 style="color: #15803d; margin: 0 0 1rem 0;">المعاهد</h3>
+            <ul style="color: #374151; margin: 0; padding-right: 1rem;">
+              <li>معاهد تقنية</li>
+              <li>معاهد مهنية</li>
+              <li>مراكز تدريب</li>
+            </ul>
+          </div>
+          <div style="background: #fef3c7; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #f59e0b;">
+            <h3 style="color: #d97706; margin: 0 0 1rem 0;">الجامعات</h3>
+            <ul style="color: #374151; margin: 0; padding-right: 1rem;">
+              <li>جامعة عدن</li>
+              <li>جامعات خاصة</li>
+              <li>كليات متخصصة</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- وظائف -->
+      <div class="section-display page-transition" id="jobs-section" style="display: none;">
+        <div class="section-header">
+          <div class="section-icon">💼</div>
+          <div>
+            <h2 class="section-title">وظائف</h2>
+            <p class="section-description">الوظائف والشواغر وفرص التدريب</p>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+          <div style="background: #f0f9ff; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #3b82f6;">
+            <h3 style="color: #1e40af; margin: 0 0 1rem 0;">وظائف حكومية</h3>
+            <p style="color: #374151; margin: 0;">الوظائف المتاحة في القطاع الحكومي</p>
+            <div style="margin-top: 1rem;">
+              <span style="background: #3b82f6; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem;">15 وظيفة</span>
+            </div>
+          </div>
+          <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #22c55e;">
+            <h3 style="color: #15803d; margin: 0 0 1rem 0;">وظائف خاصة</h3>
+            <p style="color: #374151; margin: 0;">الوظائف في القطاع الخاص</p>
+            <div style="margin-top: 1rem;">
+              <span style="background: #22c55e; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem;">32 وظيفة</span>
+            </div>
+          </div>
+          <div style="background: #fef3c7; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #f59e0b;">
+            <h3 style="color: #d97706; margin: 0 0 1rem 0;">فرص تدريب</h3>
+            <p style="color: #374151; margin: 0;">برامج التدريب والتطوير</p>
+            <div style="margin-top: 1rem;">
+              <span style="background: #f59e0b; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem;">8 برامج</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- صرف اليوم الأسعار -->
+      <div class="section-display page-transition" id="currency-section" style="display: none;">
+        <div class="section-header">
+          <div class="section-icon">💱</div>
+          <div>
+            <h2 class="section-title">صرف اليوم الأسعار</h2>
+            <p class="section-description">أسعار صرف العملات اليوم</p>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+          <div style="background: #f0f9ff; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #3b82f6; text-align: center;">
+            <h3 style="color: #1e40af; margin: 0 0 0.5rem 0;">USD</h3>
+            <p style="color: #374151; margin: 0; font-size: 1.5rem; font-weight: bold;">1,250 ريال</p>
+            <span style="color: #22c55e; font-size: 0.875rem;">↗ +2.5%</span>
+          </div>
+          <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #22c55e; text-align: center;">
+            <h3 style="color: #15803d; margin: 0 0 0.5rem 0;">EUR</h3>
+            <p style="color: #374151; margin: 0; font-size: 1.5rem; font-weight: bold;">1,380 ريال</p>
+            <span style="color: #22c55e; font-size: 0.875rem;">↗ +1.8%</span>
+          </div>
+          <div style="background: #fef3c7; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #f59e0b; text-align: center;">
+            <h3 style="color: #d97706; margin: 0 0 0.5rem 0;">SAR</h3>
+            <p style="color: #374151; margin: 0; font-size: 1.5rem; font-weight: bold;">333 ريال</p>
+            <span style="color: #ef4444; font-size: 0.875rem;">↘ -0.5%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- عدني - مساعد عدن -->
+      <div class="section-display page-transition" id="assistant-section" style="display: none;">
+        <div class="section-header">
+          <div class="section-icon">🤖</div>
+          <div>
+            <h2 class="section-title">عدني - مساعد عدن</h2>
+            <p class="section-description">مساعد ذكي لخدمات عدن لايف</p>
+          </div>
+        </div>
+        <div style="text-align: center; padding: 2rem;">
+          <div style="background: linear-gradient(135deg, #3b82f6 0%, #14b8a6 100%); color: white; padding: 2rem; border-radius: 1rem; margin-bottom: 2rem;">
+            <h3 style="margin: 0 0 1rem 0;">مرحباً! أنا عدني</h3>
+            <p style="margin: 0; opacity: 0.9;">مساعدك الذكي لجميع خدمات عدن لايف</p>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <button style="background: #3b82f6; color: white; border: none; padding: 1rem; border-radius: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+              💬 ابدأ محادثة
+            </button>
+            <button style="background: #22c55e; color: white; border: none; padding: 1rem; border-radius: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+              ❓ أسئلة شائعة
+            </button>
+            <button style="background: #f59e0b; color: white; border: none; padding: 1rem; border-radius: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+              📞 دعم فني
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- الإعدادات -->
+      <div class="section-display page-transition" id="settings-section" style="display: none;">
+        <div class="section-header">
+          <div class="section-icon">⚙️</div>
+          <div>
+            <h2 class="section-title">الإعدادات</h2>
+            <p class="section-description">إعدادات الحساب والتطبيق</p>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+          <div style="background: #f0f9ff; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #3b82f6;">
+            <h3 style="color: #1e40af; margin: 0 0 1rem 0;">إعدادات الحساب</h3>
+            <ul style="color: #374151; margin: 0; padding-right: 1rem;">
+              <li>معلومات الشخصية</li>
+              <li>تغيير كلمة المرور</li>
+              <li>إعدادات الخصوصية</li>
+            </ul>
+          </div>
+          <div style="background: #f0fdf4; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #22c55e;">
+            <h3 style="color: #15803d; margin: 0 0 1rem 0;">إعدادات التطبيق</h3>
+            <ul style="color: #374151; margin: 0; padding-right: 1rem;">
+              <li>اللغة والمنطقة</li>
+              <li>الإشعارات</li>
+              <li>الوضع المظلم</li>
+            </ul>
+          </div>
+          <div style="background: #fef3c7; padding: 1.5rem; border-radius: 0.75rem; border-right: 4px solid #f59e0b;">
+            <h3 style="color: #d97706; margin: 0 0 1rem 0;">المساعدة</h3>
+            <ul style="color: #374151; margin: 0; padding-right: 1rem;">
+              <li>مركز المساعدة</li>
+              <li>تواصل معنا</li>
+              <li>تقييم التطبيق</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <footer class="app-footer">
+      <div class="footer-container">
+        <p class="footer-text">جميع الحقوق محفوظة &copy; عدن لايف 2025</p>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('main-content');
+      sidebar.classList.toggle('collapsed');
+      mainContent.classList.toggle('sidebar-collapsed');
+    }
+
+    function showSection(section, elem) {
+      const sections = ['home', 'water', 'electricity', 'health', 'education', 'jobs', 'currency', 'assistant', 'settings'];
+      sections.forEach(function(sec) {
+        const s = document.getElementById(sec + '-section');
+        if (s) s.style.display = (sec === section ? 'block' : 'none');
+      });
+      document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+      if (elem) elem.classList.add('active');
+    }
+
+    window.onload = () => { showSection('home', document.querySelector('.sidebar-item[data-section="home"]')); };
+  </script>
+</body>
+</html>

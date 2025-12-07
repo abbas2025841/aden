@@ -1,0 +1,424 @@
+/* الهوية البصرية الرسمية لتطبيق عدن لايف */
+
+:root {
+  /* الألوان الأساسية */
+  --color-aden-blue: #0066FF;        /* زرقاء عدن */
+  --color-aden-orange: #FFAB00;      /* برتقالية شمس عدن */
+  --color-aden-white: #FAFAFA;       /* بيضاء ناصعة */
+  
+  /* تدرجات الألوان الأساسية */
+  --color-aden-blue-50: #E6F2FF;
+  --color-aden-blue-100: #CCE5FF;
+  --color-aden-blue-200: #99CCFF;
+  --color-aden-blue-300: #66B2FF;
+  --color-aden-blue-400: #3399FF;
+  --color-aden-blue-500: #0066FF;    /* الأساسي */
+  --color-aden-blue-600: #0052CC;
+  --color-aden-blue-700: #003D99;
+  --color-aden-blue-800: #002966;
+  --color-aden-blue-900: #001433;
+  
+  /* تدرجات البرتقالي */
+  --color-aden-orange-50: #FFF8E6;
+  --color-aden-orange-100: #FFF1CC;
+  --color-aden-orange-200: #FFE399;
+  --color-aden-orange-300: #FFD566;
+  --color-aden-orange-400: #FFC733;
+  --color-aden-orange-500: #FFAB00;  /* الأساسي */
+  --color-aden-orange-600: #CC8800;
+  --color-aden-orange-700: #996600;
+  --color-aden-orange-800: #664400;
+  --color-aden-orange-900: #332200;
+  
+  /* الألوان المحايدة */
+  --color-aden-gray-50: #FAFAFA;     /* الخلفية الأساسية */
+  --color-aden-gray-100: #F5F5F5;
+  --color-aden-gray-200: #EEEEEE;
+  --color-aden-gray-300: #E0E0E0;
+  --color-aden-gray-400: #BDBDBD;
+  --color-aden-gray-500: #9E9E9E;
+  --color-aden-gray-600: #757575;
+  --color-aden-gray-700: #616161;
+  --color-aden-gray-800: #424242;
+  --color-aden-gray-900: #212121;
+  
+  /* ألوان الحالة */
+  --color-aden-success: #4CAF50;
+  --color-aden-warning: #FF9800;
+  --color-aden-error: #F44336;
+  --color-aden-info: #2196F3;
+  
+  /* ألوان الخدمات */
+  --color-aden-water: #00BCD4;       /* أزرق مائي */
+  --color-aden-electricity: #FFC107; /* أصفر كهربائي */
+  --color-aden-health: #E91E63;      /* وردي صحي */
+  --color-aden-jobs: #9C27B0;        /* بنفسجي وظائف */
+  --color-aden-maps: #4CAF50;        /* أخضر خرائط */
+  --color-aden-currency: #FF5722;    /* برتقالي عملات */
+  --color-aden-flights: #3F51B5;     /* نيلي طيران */
+  --color-aden-emergency: #F44336;   /* أحمر طوارئ */
+  
+  /* الظلال */
+  --shadow-aden-sm: 0 1px 2px 0 rgba(0, 102, 255, 0.05);
+  --shadow-aden-base: 0 1px 3px 0 rgba(0, 102, 255, 0.1), 0 1px 2px 0 rgba(0, 102, 255, 0.06);
+  --shadow-aden-md: 0 4px 6px -1px rgba(0, 102, 255, 0.1), 0 2px 4px -1px rgba(0, 102, 255, 0.06);
+  --shadow-aden-lg: 0 10px 15px -3px rgba(0, 102, 255, 0.1), 0 4px 6px -2px rgba(0, 102, 255, 0.05);
+  --shadow-aden-xl: 0 20px 25px -5px rgba(0, 102, 255, 0.1), 0 10px 10px -5px rgba(0, 102, 255, 0.04);
+  
+  /* الحدود */
+  --border-aden-sm: 1px solid var(--color-aden-blue-200);
+  --border-aden-base: 2px solid var(--color-aden-blue-300);
+  --border-aden-md: 3px solid var(--color-aden-blue-400);
+  --border-aden-lg: 4px solid var(--color-aden-blue-500);
+  
+  /* نصف قطر الحدود */
+  --radius-aden-sm: 0.25rem;
+  --radius-aden-base: 0.5rem;
+  --radius-aden-md: 0.75rem;
+  --radius-aden-lg: 1rem;
+  --radius-aden-xl: 1.5rem;
+  --radius-aden-full: 9999px;
+}
+
+/* فئات الألوان للاستخدام المباشر */
+.aden-blue {
+  color: var(--color-aden-blue);
+}
+
+.aden-orange {
+  color: var(--color-aden-orange);
+}
+
+.aden-white {
+  color: var(--color-aden-white);
+}
+
+.bg-aden-blue {
+  background-color: var(--color-aden-blue);
+}
+
+.bg-aden-orange {
+  background-color: var(--color-aden-orange);
+}
+
+.bg-aden-white {
+  background-color: var(--color-aden-white);
+}
+
+.border-aden-blue {
+  border-color: var(--color-aden-blue);
+}
+
+.border-aden-orange {
+  border-color: var(--color-aden-orange);
+}
+
+/* تدرجات الخلفية */
+.bg-aden-gradient {
+  background: linear-gradient(135deg, var(--color-aden-blue) 0%, var(--color-aden-orange) 100%);
+}
+
+.bg-aden-gradient-vertical {
+  background: linear-gradient(180deg, var(--color-aden-blue) 0%, var(--color-aden-orange) 100%);
+}
+
+.bg-aden-gradient-radial {
+  background: radial-gradient(circle, var(--color-aden-blue) 0%, var(--color-aden-orange) 100%);
+}
+
+/* تطبيق عرض كامل مع حشوة جانبية مريحة على جميع الصفحات */
+.app-container {
+  max-width: 100% !important;
+}
+
+/* إلغاء أي قيود max-w-md داخل الحاويات الموحدة */
+main.container.max-w-md,
+.max-w-md {
+  max-width: 100% !important;
+}
+
+/* ظلال العلامة التجارية */
+.shadow-aden-sm {
+  box-shadow: var(--shadow-aden-sm);
+}
+
+.shadow-aden-base {
+  box-shadow: var(--shadow-aden-base);
+}
+
+.shadow-aden-md {
+  box-shadow: var(--shadow-aden-md);
+}
+
+.shadow-aden-lg {
+  box-shadow: var(--shadow-aden-lg);
+}
+
+.shadow-aden-xl {
+  box-shadow: var(--shadow-aden-xl);
+}
+
+/* حدود العلامة التجارية */
+.border-aden-sm {
+  border: var(--border-aden-sm);
+}
+
+.border-aden-base {
+  border: var(--border-aden-base);
+}
+
+.border-aden-md {
+  border: var(--border-aden-md);
+}
+
+.border-aden-lg {
+  border: var(--border-aden-lg);
+}
+
+/* نصف قطر الحدود */
+.rounded-aden-sm {
+  border-radius: var(--radius-aden-sm);
+}
+
+.rounded-aden-base {
+  border-radius: var(--radius-aden-base);
+}
+
+.rounded-aden-md {
+  border-radius: var(--radius-aden-md);
+}
+
+.rounded-aden-lg {
+  border-radius: var(--radius-aden-lg);
+}
+
+.rounded-aden-xl {
+  border-radius: var(--radius-aden-xl);
+}
+
+.rounded-aden-full {
+  border-radius: var(--radius-aden-full);
+}
+
+/* ألوان الخدمات */
+.service-water {
+  color: var(--color-aden-water);
+  background-color: rgba(0, 188, 212, 0.1);
+}
+
+.service-electricity {
+  color: var(--color-aden-electricity);
+  background-color: rgba(255, 193, 7, 0.1);
+}
+
+.service-health {
+  color: var(--color-aden-health);
+  background-color: rgba(233, 30, 99, 0.1);
+}
+
+.service-jobs {
+  color: var(--color-aden-jobs);
+  background-color: rgba(156, 39, 176, 0.1);
+}
+
+.service-maps {
+  color: var(--color-aden-maps);
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+.service-currency {
+  color: var(--color-aden-currency);
+  background-color: rgba(255, 87, 34, 0.1);
+}
+
+.service-flights {
+  color: var(--color-aden-flights);
+  background-color: rgba(63, 81, 181, 0.1);
+}
+
+.service-emergency {
+  color: var(--color-aden-emergency);
+  background-color: rgba(244, 67, 54, 0.1);
+}
+
+/* تأثيرات الحركة */
+.aden-hover {
+  transition: all 0.3s ease;
+}
+
+.aden-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-aden-lg);
+}
+
+.aden-click {
+  transition: all 0.1s ease;
+}
+
+.aden-click:active {
+  transform: scale(0.98);
+}
+
+/* النصوص */
+.text-aden-primary {
+  color: var(--color-aden-blue);
+}
+
+.text-aden-secondary {
+  color: var(--color-aden-orange);
+}
+
+.text-aden-muted {
+  color: var(--color-aden-gray-600);
+}
+
+/* الخلفيات */
+.bg-aden-primary {
+  background-color: var(--color-aden-blue);
+}
+
+.bg-aden-secondary {
+  background-color: var(--color-aden-orange);
+}
+
+.bg-aden-surface {
+  background-color: var(--color-aden-white);
+}
+
+.bg-aden-background {
+  background-color: var(--color-aden-gray-50);
+}
+
+/* الأزرار */
+.btn-aden-primary {
+  background-color: var(--color-aden-blue);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-aden-base);
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-aden-primary:hover {
+  background-color: var(--color-aden-blue-600);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-aden-md);
+}
+
+.btn-aden-secondary {
+  background-color: var(--color-aden-orange);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-aden-base);
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-aden-secondary:hover {
+  background-color: var(--color-aden-orange-600);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-aden-md);
+}
+
+/* البطاقات */
+.card-aden {
+  background-color: var(--color-aden-white);
+  border: var(--border-aden-sm);
+  border-radius: var(--radius-aden-lg);
+  box-shadow: var(--shadow-aden-base);
+  transition: all 0.3s ease;
+}
+
+.card-aden:hover {
+  box-shadow: var(--shadow-aden-lg);
+  transform: translateY(-2px);
+}
+
+/* التدرجات المخصصة */
+.gradient-aden-sunset {
+  background: linear-gradient(135deg, var(--color-aden-blue) 0%, var(--color-aden-orange) 50%, var(--color-aden-orange-600) 100%);
+}
+
+.gradient-aden-ocean {
+  background: linear-gradient(135deg, var(--color-aden-blue-400) 0%, var(--color-aden-blue-600) 100%);
+}
+
+.gradient-aden-fire {
+  background: linear-gradient(135deg, var(--color-aden-orange-400) 0%, var(--color-aden-orange-600) 100%);
+}
+
+.gradient-aden-sky {
+  background: linear-gradient(135deg, var(--color-aden-flights) 0%, #5C6BC0 50%, #7986CB 100%);
+}
+
+/* الرسوم المتحركة */
+@keyframes aden-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes aden-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes aden-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-aden-pulse {
+  animation: aden-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-aden-bounce {
+  animation: aden-bounce 1s infinite;
+}
+
+.animate-aden-spin {
+  animation: aden-spin 1s linear infinite;
+}
+
+/* الاستجابة للأجهزة المختلفة */
+@media (max-width: 768px) {
+  .btn-aden-primary,
+  .btn-aden-secondary {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .card-aden {
+    border-radius: var(--radius-aden-base);
+  }
+}
+
+/* الوضع المظلم */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-aden-white: #1a1a1a;
+    --color-aden-gray-50: #2a2a2a;
+    --color-aden-gray-100: #3a3a3a;
+  }
+  
+  .bg-aden-surface {
+    background-color: var(--color-aden-gray-100);
+  }
+  
+  .bg-aden-background {
+    background-color: var(--color-aden-gray-50);
+  }
+}

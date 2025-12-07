@@ -1,0 +1,228 @@
+/* خطوط Google Fonts العربية */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&family=Tajawal:wght@200;300;400;500;700;800;900&display=swap');
+
+/* إعدادات الخطوط العربية */
+.arabic-font {
+  font-family: 'Cairo', 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.tajawal-font {
+  font-family: 'Tajawal', 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* تحسينات RTL */
+.rtl-support {
+  direction: rtl;
+  text-align: right;
+}
+
+.rtl-support .space-x-3 > * + * {
+  margin-left: 0;
+  margin-right: 0.75rem;
+}
+
+.rtl-support .space-x-reverse > * + * {
+  margin-left: 0.75rem;
+  margin-right: 0;
+}
+
+/* تحسينات البطاقات */
+.user-service-card {
+  font-family: 'Cairo', 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  direction: rtl;
+  text-align: right;
+}
+
+.user-service-card .card-content {
+  direction: rtl;
+}
+
+.user-service-card .flex.space-x-3 > * + * {
+  margin-left: 0;
+  margin-right: 0.75rem;
+}
+
+.user-service-card .flex.space-x-reverse > * + * {
+  margin-left: 0.75rem;
+  margin-right: 0;
+}
+
+/* تحسينات الاستجابة */
+@media (max-width: 640px) {
+  .user-service-card {
+    max-width: 100%;
+    margin: 0 1rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .user-service-card {
+    max-width: 320px;
+  }
+}
+
+@media (min-width: 769px) {
+  .user-service-card {
+    max-width: 360px;
+  }
+}
+
+/* تأثيرات الحركة */
+.card-hover-effect {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover-effect:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* تحسينات الألوان */
+.gradient-blue-teal {
+  background: linear-gradient(135deg, #3b82f6 0%, #14b8a6 100%);
+}
+
+.gradient-blue-teal:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #0d9488 100%);
+}
+
+/* تحسينات النص العربي */
+.arabic-text {
+  font-family: 'Cairo', 'Tajawal', sans-serif;
+  line-height: 1.6;
+  letter-spacing: 0.025em;
+}
+
+.arabic-text h1,
+.arabic-text h2,
+.arabic-text h3,
+.arabic-text h4,
+.arabic-text h5,
+.arabic-text h6 {
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.arabic-text p {
+  line-height: 1.7;
+}
+
+/* تحسينات الحالة */
+.status-indicator {
+  position: relative;
+}
+
+.status-indicator::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+  background-color: currentColor;
+}
+
+.status-active::after {
+  background-color: #10b981;
+}
+
+.status-inactive::after {
+  background-color: #6b7280;
+}
+
+.status-pending::after {
+  background-color: #f59e0b;
+}
+
+.status-completed::after {
+  background-color: #3b82f6;
+}
+
+/* تحسينات الأيقونات */
+.icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #14b8a6 100%);
+  color: white;
+  font-size: 1.5rem;
+}
+
+/* تحسينات الأزرار */
+.action-button {
+  background: linear-gradient(135deg, #3b82f6 0%, #14b8a6 100%);
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  color: white;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.action-button:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #0d9488 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* تحسينات الشارات */
+.badge-custom {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid;
+}
+
+.badge-default {
+  background-color: #f3f4f6;
+  color: #374151;
+  border-color: #d1d5db;
+}
+
+.badge-secondary {
+  background-color: #e5e7eb;
+  color: #4b5563;
+  border-color: #9ca3af;
+}
+
+.badge-destructive {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.badge-outline {
+  background-color: transparent;
+  color: #6b7280;
+  border-color: #d1d5db;
+}
+
+
+/* تحسينات الوضع المظلم */
+@media (prefers-color-scheme: dark) {
+  .user-service-card {
+    background-color: #1f2937;
+    border-color: #374151;
+    color: #f9fafb;
+  }
+  
+  .arabic-text {
+    color: #f9fafb;
+  }
+  
+  .badge-default {
+    background-color: #374151;
+    color: #d1d5db;
+    border-color: #4b5563;
+  }
+}

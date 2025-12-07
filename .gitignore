@@ -1,0 +1,45 @@
+node_modules/
+dist/
+build/
+.next/
+.turbo/
+.cache/
+.tmp/
+
+# Vite / React client build
+client/dist/
+client/.vite/
+
+# Capacitor / Android
+android/.gradle/
+android/.idea/
+android/build/
+android/app/build/
+android/captures/
+
+# iOS / Xcode (if added later)
+ios/Pods/
+ios/build/
+*.xcworkspace/
+
+# Logs & diagnostics
+*.log
+*.pid
+*.seed
+*.retry
+*.orig
+*.rej
+*.swp
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+*.keystore
+
+# Misc
+coverage/
+tmp/
+*.iml
+.DS_Store
+Thumbs.db

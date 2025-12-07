@@ -1,0 +1,33 @@
+{
+  "name": "عدن لايف - خدمات عدن الذكية",
+  "short_name": "عدن لايف",
+  "description": "تطبيق شامل لجميع خدمات مدينة عدن - المياه، الكهرباء، الصحة، التعليم، الوظائف والمزيد",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FB6107",
+  "theme_color": "#FFA500",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-aden.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["utilities", "lifestyle", "productivity"],
+  "lang": "ar",
+  "dir": "rtl"
+}

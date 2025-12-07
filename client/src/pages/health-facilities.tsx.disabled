@@ -1,0 +1,672 @@
+// ØµÙØ­Ø© Ø§Ù„Ù…Ø±Ø§ÙÙ‚ Ø§Ù„ØµØ­ÙŠØ© - Cursor Ø§Ù„Ø£Ø³Ø·ÙˆØ±ÙŠ
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import AppHeader from '@/components/AppHeader';
+import AppFooter from '@/components/AppFooter';
+import { fetchWithFallback } from '@/lib/fetchWithFallback';
+import { ensureArray, multiFilter, getUniqueValues } from '@/lib/dataUtils';
+import { adenHealthFacilities, HealthFacility } from '@/data/aden-health-facilities';
+
+export default function HealthFacilitiesPage() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedType, setSelectedType] = useState('all');
+  const [selectedDistrict, setSelectedDistrict] = useState('all');
+
+  // Ø¯Ø§Ù„Ø© Ù„ÙØªØ­ Ø§Ù„Ø®Ø±ÙŠØ·Ø©
+  const openMap = (position: [number, number], facilityName: string) => {
+    const [latitude, longitude] = position;
+    
+    // Ø¥Ù†Ø´Ø§Ø¡ Ø±Ø§Ø¨Ø· Google Maps
+    const googleMapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}&z=15&t=m`;
+    
+    // Ø¥Ù†Ø´Ø§Ø¡ Ø±Ø§Ø¨Ø· Apple Maps (Ù„Ù„Ù…Ø³ØªØ®Ø¯Ù…ÙŠÙ† Ø¹Ù„Ù‰ iOS)
+    const appleMapsUrl = `http://maps.apple.com/?q=${latitude},${longitude}&z=15&t=m`;
+    
+    // Ø¥Ù†Ø´Ø§Ø¡ Ø±Ø§Ø¨Ø· OpenStreetMap
+    const openStreetMapUrl = `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}&zoom=15`;
+    
+    // ÙØªØ­ Ù†Ø§ÙØ°Ø© Ù…Ù†Ø¨Ø«Ù‚Ø© Ù…Ø¹ Ø®ÙŠØ§Ø±Ø§Øª Ø§Ù„Ø®Ø±Ø§Ø¦Ø·
+    const mapWindow = window.open('', '_blank', 'width=800,height=600');
+    if (mapWindow) {
+      mapWindow.document.write(`
+        <!DOCTYPE html>
+        <html dir="rtl" lang="ar">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Ø®Ø±ÙŠØ·Ø© ${facilityName}</title>
+          <style>
+            body { 
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+              margin: 0; 
+              padding: 20px; 
+              background: #f5f5f5;
+              direction: rtl;
+            }
+            .container { 
+              max-width: 800px; 
+              margin: 0 auto; 
+              background: white; 
+              border-radius: 10px; 
+              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+              overflow: hidden;
+            }
+            .header { 
+              background: #2563eb; 
+              color: white; 
+              padding: 20px; 
+              text-align: center; 
+            }
+            .map-container { 
+              height: 400px; 
+              position: relative;
+            }
+            .map-iframe { 
+              width: 100%; 
+              height: 100%; 
+              border: none; 
+            }
+            .map-options { 
+              padding: 20px; 
+              text-align: center; 
+            }
+            .map-btn { 
+              display: inline-block; 
+              margin: 5px; 
+              padding: 10px 20px; 
+              background: #2563eb; 
+              color: white; 
+              text-decoration: none; 
+              border-radius: 5px; 
+              transition: background 0.3s;
+            }
+            .map-btn:hover { 
+              background: #1d4ed8; 
+            }
+            .coordinates { 
+              background: #f8f9fa; 
+              padding: 15px; 
+              margin: 10px 0; 
+              border-radius: 5px; 
+              font-family: monospace; 
+              text-align: center;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>ðŸ—ºï¸ Ø®Ø±ÙŠØ·Ø© ${facilityName}</h1>
+              <p>Ù…ÙˆÙ‚Ø¹ Ø§Ù„Ù…Ø±ÙÙ‚ Ø§Ù„ØµØ­ÙŠ Ø¹Ù„Ù‰ Ø§Ù„Ø®Ø±ÙŠØ·Ø©</p>
+            </div>
+            
+            <div class="map-container">
+              <iframe 
+                class="map-iframe"
+                src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dOWWgUfXz8z8z8&q=${latitude},${longitude}&zoom=15"
+                allowfullscreen>
+              </iframe>
+            </div>
+            
+            <div class="map-options">
+              <h3>Ø®ÙŠØ§Ø±Ø§Øª Ø§Ù„Ø®Ø±Ø§Ø¦Ø·:</h3>
+              <a href="${googleMapsUrl}" target="_blank" class="map-btn">Google Maps</a>
+              <a href="${appleMapsUrl}" target="_blank" class="map-btn">Apple Maps</a>
+              <a href="${openStreetMapUrl}" target="_blank" class="map-btn">OpenStreetMap</a>
+              
+              <div class="coordinates">
+                <strong>Ø§Ù„Ø¥Ø­Ø¯Ø§Ø«ÙŠØ§Øª:</strong><br>
+                Ø®Ø· Ø§Ù„Ø¹Ø±Ø¶: ${latitude}<br>
+                Ø®Ø· Ø§Ù„Ø·ÙˆÙ„: ${longitude}
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `);
+    }
+  };
+
+  // Ø¯Ø§Ù„Ø© Ù„Ø¹Ø±Ø¶ Ù…Ø¹Ø±Ø¶ Ø§Ù„ØµÙˆØ±
+  const openImageGallery = (facility: any) => {
+    if (!facility.images?.gallery || facility.images.gallery.length === 0) return;
+    
+    const galleryWindow = window.open('', '_blank', 'width=1000,height=700');
+    if (galleryWindow) {
+      galleryWindow.document.write(`
+        <!DOCTYPE html>
+        <html dir="rtl" lang="ar">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Ù…Ø¹Ø±Ø¶ ØµÙˆØ± ${facility.name}</title>
+          <style>
+            body { 
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+              margin: 0; 
+              padding: 0;
+              background: #f5f5f5;
+              direction: rtl;
+            }
+            .header { 
+              background: #7c3aed; 
+              color: white; 
+              padding: 20px; 
+              text-align: center; 
+            }
+            .gallery-container { 
+              padding: 20px; 
+              max-width: 1000px; 
+              margin: 0 auto;
+            }
+            .main-image { 
+              width: 100%; 
+              height: 400px; 
+              object-fit: cover; 
+              border-radius: 10px; 
+              margin-bottom: 20px;
+              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            }
+            .thumbnail-grid { 
+              display: grid; 
+              grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+              gap: 15px; 
+              margin-top: 20px;
+            }
+            .thumbnail { 
+              width: 100%; 
+              height: 120px; 
+              object-fit: cover; 
+              border-radius: 8px; 
+              cursor: pointer; 
+              transition: transform 0.3s, box-shadow 0.3s;
+              border: 3px solid transparent;
+            }
+            .thumbnail:hover { 
+              transform: scale(1.05); 
+              box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            }
+            .thumbnail.active { 
+              border-color: #7c3aed; 
+              box-shadow: 0 0 0 2px #7c3aed;
+            }
+            .info-panel { 
+              background: white; 
+              padding: 20px; 
+              border-radius: 10px; 
+              margin-top: 20px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .close-btn { 
+              position: absolute; 
+              top: 20px; 
+              left: 20px; 
+              background: rgba(0,0,0,0.5); 
+              color: white; 
+              border: none; 
+              padding: 10px 15px; 
+              border-radius: 5px; 
+              cursor: pointer;
+              font-size: 16px;
+            }
+            .close-btn:hover { 
+              background: rgba(0,0,0,0.7); 
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <button class="close-btn" onclick="window.close()">âœ• Ø¥ØºÙ„Ø§Ù‚</button>
+            <h1>ðŸ“¸ Ù…Ø¹Ø±Ø¶ ØµÙˆØ± ${facility.name}</h1>
+            <p>${facility.type === 'hospital' ? 'Ù…Ø³ØªØ´ÙÙ‰' : facility.type === 'clinic' ? 'Ø¹ÙŠØ§Ø¯Ø©' : facility.type === 'pharmacy' ? 'ØµÙŠØ¯Ù„ÙŠØ©' : facility.type} - ${facility.district}</p>
+          </div>
+          
+          <div class="gallery-container">
+            <img id="mainImage" class="main-image" src="${facility.images.main}" alt="${facility.name}">
+            
+            <div class="thumbnail-grid">
+              ${facility.images.gallery.map((img: string, index: number) => `
+                <img 
+                  class="thumbnail ${index === 0 ? 'active' : ''}" 
+                  src="${img}" 
+                  alt="ØµÙˆØ±Ø© ${index + 1}"
+                  onclick="changeMainImage('${img}', this)"
+                >
+              `).join('')}
+            </div>
+            
+            <div class="info-panel">
+              <h3>Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø§Ù„Ù…Ø±ÙÙ‚</h3>
+              <p><strong>Ø§Ù„Ø§Ø³Ù…:</strong> ${facility.name}</p>
+              <p><strong>Ø§Ù„Ù†ÙˆØ¹:</strong> ${facility.type === 'hospital' ? 'Ù…Ø³ØªØ´ÙÙ‰' : facility.type === 'clinic' ? 'Ø¹ÙŠØ§Ø¯Ø©' : facility.type === 'pharmacy' ? 'ØµÙŠØ¯Ù„ÙŠØ©' : facility.type}</p>
+              <p><strong>Ø§Ù„Ù…Ù†Ø·Ù‚Ø©:</strong> ${facility.district}</p>
+              <p><strong>Ø§Ù„Ø¹Ù†ÙˆØ§Ù†:</strong> ${facility.address}</p>
+              ${facility.contact?.phone?.[0] ? `<p><strong>Ø§Ù„Ù‡Ø§ØªÙ:</strong> ${facility.contact.phone[0]}</p>` : ''}
+              <p><strong>Ø³Ø§Ø¹Ø§Øª Ø§Ù„Ø¹Ù…Ù„:</strong> ${facility.workingHours}</p>
+            </div>
+          </div>
+          
+          <script>
+            function changeMainImage(src, thumbnail) {
+              document.getElementById('mainImage').src = src;
+              document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+              thumbnail.classList.add('active');
+            }
+          </script>
+        </body>
+        </html>
+      `);
+    }
+  };
+
+  // Ø¯Ø§Ù„Ø© Ù„Ø¹Ø±Ø¶ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ù…Ø±Ø§ÙÙ‚ Ø¹Ù„Ù‰ Ø®Ø±ÙŠØ·Ø© ÙˆØ§Ø­Ø¯Ø©
+  const openAllFacilitiesMap = () => {
+    const facilities = ensureArray(data);
+    
+    // Ø¥Ù†Ø´Ø§Ø¡ Ø±Ø§Ø¨Ø· Google Maps Ù…Ø¹ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ù…Ø±Ø§ÙÙ‚
+    const googleMapsUrl = `https://www.google.com/maps/dir/${facilities.map(f => f.position.join(',')).join('/')}`;
+    
+    // ÙØªØ­ Ù†Ø§ÙØ°Ø© Ù…Ù†Ø¨Ø«Ù‚Ø© Ù…Ø¹ Ø®Ø±ÙŠØ·Ø© Ø¬Ù…ÙŠØ¹ Ø§Ù„Ù…Ø±Ø§ÙÙ‚
+    const mapWindow = window.open('', '_blank', 'width=1000,height=700');
+    if (mapWindow) {
+      mapWindow.document.write(`
+        <!DOCTYPE html>
+        <html dir="rtl" lang="ar">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Ø®Ø±ÙŠØ·Ø© Ø¬Ù…ÙŠØ¹ Ø§Ù„Ù…Ø±Ø§ÙÙ‚ Ø§Ù„ØµØ­ÙŠØ© ÙÙŠ Ø¹Ø¯Ù†</title>
+          <style>
+            body { 
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+              margin: 0; 
+              padding: 20px; 
+              background: #f5f5f5;
+              direction: rtl;
+            }
+            .container { 
+              max-width: 1000px; 
+              margin: 0 auto; 
+              background: white; 
+              border-radius: 10px; 
+              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+              overflow: hidden;
+            }
+            .header { 
+              background: #059669; 
+              color: white; 
+              padding: 20px; 
+              text-align: center; 
+            }
+            .map-container { 
+              height: 500px; 
+              position: relative;
+            }
+            .map-iframe { 
+              width: 100%; 
+              height: 100%; 
+              border: none; 
+            }
+            .facilities-list { 
+              padding: 20px; 
+              max-height: 200px; 
+              overflow-y: auto;
+            }
+            .facility-item { 
+              padding: 10px; 
+              border-bottom: 1px solid #eee; 
+              display: flex; 
+              justify-content: space-between; 
+              align-items: center;
+            }
+            .facility-name { 
+              font-weight: bold; 
+              color: #333;
+            }
+            .facility-type { 
+              color: #666; 
+              font-size: 0.9em;
+            }
+            .map-btn { 
+              display: inline-block; 
+              margin: 5px; 
+              padding: 8px 16px; 
+              background: #059669; 
+              color: white; 
+              text-decoration: none; 
+              border-radius: 5px; 
+              transition: background 0.3s;
+              font-size: 0.9em;
+            }
+            .map-btn:hover { 
+              background: #047857; 
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>ðŸ—ºï¸ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ù…Ø±Ø§ÙÙ‚ Ø§Ù„ØµØ­ÙŠØ© ÙÙŠ Ø¹Ø¯Ù†</h1>
+              <p>Ø®Ø±ÙŠØ·Ø© Ø´Ø§Ù…Ù„Ø© Ù„Ø¬Ù…ÙŠØ¹ Ø§Ù„Ù…Ø³ØªØ´ÙÙŠØ§Øª ÙˆØ§Ù„Ø¹ÙŠØ§Ø¯Ø§Øª ÙˆØ§Ù„ØµÙŠØ¯Ù„ÙŠØ§Øª</p>
+            </div>
+            
+            <div class="map-container">
+              <iframe 
+                class="map-iframe"
+                src="https://www.google.com/maps/embed/v1/view?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dOWWgUfXz8z8z8&center=12.7794,45.0369&zoom=12"
+                allowfullscreen>
+              </iframe>
+            </div>
+            
+            <div class="facilities-list">
+              <h3>Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ù…Ø±Ø§ÙÙ‚ (${facilities.length} Ù…Ø±ÙÙ‚):</h3>
+              ${facilities.map(facility => `
+                <div class="facility-item">
+                  <div>
+                    <div class="facility-name">${facility.name}</div>
+                    <div class="facility-type">${facility.type === 'hospital' ? 'Ù…Ø³ØªØ´ÙÙ‰' : facility.type === 'clinic' ? 'Ø¹ÙŠØ§Ø¯Ø©' : facility.type === 'pharmacy' ? 'ØµÙŠØ¯Ù„ÙŠØ©' : facility.type} - ${facility.district}</div>
+                  </div>
+                  <a href="https://www.google.com/maps?q=${facility.position[0]},${facility.position[1]}" target="_blank" class="map-btn">Ø¹Ø±Ø¶</a>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </body>
+        </html>
+      `);
+    }
+  };
+
+  // Ø§Ø³ØªØ®Ø¯Ø§Ù… React Query Ù„Ø¬Ù„Ø¨ Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ù…Ø¹ Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø­Ù‚ÙŠÙ‚ÙŠØ©
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['health-facilities'],
+    queryFn: async () => {
+      try {
+        // Ù…Ø­Ø§ÙˆÙ„Ø© Ø¬Ù„Ø¨ Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ù…Ù† API Ø£ÙˆÙ„Ø§Ù‹
+      const result = await fetchWithFallback.fetch<HealthFacility[]>(
+        '/api/health/facilities',
+        {
+          timeout: 5000,
+          retries: 2,
+            fallbackData: adenHealthFacilities, // Ø§Ø³ØªØ®Ø¯Ø§Ù… Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø­Ù‚ÙŠÙ‚ÙŠØ© ÙƒÙ€ fallback
+          cacheKey: 'health-facilities',
+          cacheExpiry: 15 * 60 * 1000 // 15 Ø¯Ù‚ÙŠÙ‚Ø©
+        }
+      );
+        return result.data || adenHealthFacilities;
+      } catch (error) {
+        // ÙÙŠ Ø­Ø§Ù„Ø© ÙØ´Ù„ APIØŒ Ø§Ø³ØªØ®Ø¯Ù… Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø­Ù‚ÙŠÙ‚ÙŠØ© Ø§Ù„Ù…Ø­Ù„ÙŠØ©
+        console.log('Using local health facilities data');
+        return adenHealthFacilities;
+      }
+    },
+    staleTime: 10 * 60 * 1000, // 10 Ø¯Ù‚Ø§Ø¦Ù‚
+    cacheTime: 20 * 60 * 1000 // 20 Ø¯Ù‚ÙŠÙ‚Ø©
+  });
+
+  // Ø§Ù„ØªØ£ÙƒØ¯ Ù…Ù† Ø£Ù† Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª array
+  const facilities = ensureArray(data);
+  
+  // ÙÙ„ØªØ±Ø© Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ø¨Ø§Ø³ØªØ®Ø¯Ø§Ù… Ø§Ù„Ø£Ø¯ÙˆØ§Øª Ø§Ù„Ù…Ø­Ø³Ù†Ø©
+  const filteredFacilities = multiFilter(facilities, {
+    search: {
+      query: searchQuery,
+      fields: ['name', 'address', 'services', 'specialties']
+    },
+    exact: {
+      type: selectedType === 'all' ? undefined : selectedType,
+      district: selectedDistrict === 'all' ? undefined : selectedDistrict
+    }
+  });
+
+  // Ø§Ù„Ø­ØµÙˆÙ„ Ø¹Ù„Ù‰ Ø§Ù„Ù…Ù†Ø§Ø·Ù‚ Ø§Ù„ÙØ±ÙŠØ¯Ø©
+  const districts = getUniqueValues(facilities, 'district');
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <AppHeader />
+        <div className="container mx-auto px-4 py-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-300 rounded w-1/3 mb-4"></div>
+            <div className="h-4 bg-gray-300 rounded w-1/2 mb-8"></div>
+            <div className="space-y-4">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="h-40 bg-gray-300 rounded"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <AppFooter />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <AppHeader />
+        <div className="container mx-auto px-4 py-8">
+          <div className="bg-red-100 border border-red-300 rounded-lg p-6 text-center">
+            <h2 className="text-xl font-semibold text-red-800 mb-2">Ø®Ø·Ø£ ÙÙŠ ØªØ­Ù…ÙŠÙ„ Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª</h2>
+            <p className="text-red-600 mb-4">ÙØ´Ù„ ÙÙŠ Ø¬Ù„Ø¨ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø±Ø§ÙÙ‚ Ø§Ù„ØµØ­ÙŠØ©</p>
+            <button
+              onClick={() => refetch()}
+              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+            >
+              Ø¥Ø¹Ø§Ø¯Ø© Ø§Ù„Ù…Ø­Ø§ÙˆÙ„Ø©
+            </button>
+          </div>
+        </div>
+        <AppFooter />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <AppHeader />
+      
+      <div className="container mx-auto px-4 py-8">
+        {/* Ø§Ù„Ø¹Ù†ÙˆØ§Ù† */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">ðŸ¥ Ø§Ù„Ù…Ø±Ø§ÙÙ‚ Ø§Ù„ØµØ­ÙŠØ© ÙÙŠ Ø¹Ø¯Ù†</h1>
+          <p className="text-gray-600">Ø§Ø¨Ø­Ø« Ø¹Ù† Ø£Ù‚Ø±Ø¨ Ù…Ø³ØªØ´ÙÙ‰ Ø£Ùˆ Ø¹ÙŠØ§Ø¯Ø© Ø£Ùˆ ØµÙŠØ¯Ù„ÙŠØ©</p>
+          <div className="mt-4 flex gap-3 justify-center">
+            <button 
+              onClick={() => openAllFacilitiesMap()}
+              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors shadow-md"
+            >
+              ðŸ—ºï¸ Ø¹Ø±Ø¶ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ù…Ø±Ø§ÙÙ‚ Ø¹Ù„Ù‰ Ø§Ù„Ø®Ø±ÙŠØ·Ø©
+            </button>
+            <button 
+              onClick={() => window.open('/health-maps', '_blank')}
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+            >
+              ðŸ—ºï¸ Ø®Ø±Ø§Ø¦Ø· ØªÙØ§Ø¹Ù„ÙŠØ©
+            </button>
+          </div>
+        </div>
+
+        {/* Ø§Ù„ÙÙ„Ø§ØªØ± */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Ø§Ù„Ø¨Ø­Ø« */}
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Ø§Ø¨Ø­Ø« Ø¹Ù† Ù…Ø±ÙÙ‚ ØµØ­ÙŠ..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span className="text-gray-400">ðŸ”</span>
+            </div>
+          </div>
+
+            {/* Ù†ÙˆØ¹ Ø§Ù„Ù…Ø±ÙÙ‚ */}
+            <select
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø£Ù†ÙˆØ§Ø¹</option>
+              <option value="hospital">Ù…Ø³ØªØ´ÙÙ‰</option>
+              <option value="clinic">Ø¹ÙŠØ§Ø¯Ø©</option>
+              <option value="pharmacy">ØµÙŠØ¯Ù„ÙŠØ©</option>
+              <option value="laboratory">Ù…Ø®ØªØ¨Ø±</option>
+              <option value="dental">Ø¹ÙŠØ§Ø¯Ø© Ø£Ø³Ù†Ø§Ù†</option>
+              <option value="specialized">Ù…ØªØ®ØµØµ</option>
+            </select>
+
+            {/* Ø§Ù„Ù…Ù†Ø·Ù‚Ø© */}
+            <select
+              value={selectedDistrict}
+              onChange={(e) => setSelectedDistrict(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">Ø¬Ù…ÙŠØ¹ Ø§Ù„Ù…Ù†Ø§Ø·Ù‚</option>
+              {districts.map(district => (
+                <option key={district} value={district}>{district}</option>
+              ))}
+            </select>
+            </div>
+          </div>
+
+        {/* Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ù…Ø±Ø§ÙÙ‚ */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {filteredFacilities.map((facility) => (
+            <div key={facility.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              {/* ØµÙˆØ±Ø© Ø§Ù„Ù…Ø±ÙÙ‚ */}
+              {facility.images?.main && (
+                <div className="relative h-48 overflow-hidden">
+                  <img 
+                    src={facility.images.main} 
+                    alt={facility.name}
+                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                  <div className="absolute top-2 right-2">
+                    <span className="text-2xl bg-white bg-opacity-80 rounded-full p-2">{facility.icon}</span>
+                  </div>
+                  {facility.availability.emergency && (
+                    <div className="absolute top-2 left-2">
+                      <span className="px-2 py-1 bg-red-500 text-white text-xs rounded-full font-medium">
+                        Ø·ÙˆØ§Ø±Ø¦
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">{facility.name}</h3>
+                  <p className="text-sm text-gray-600 capitalize">
+                    {facility.type === 'hospital' ? 'Ù…Ø³ØªØ´ÙÙ‰' :
+                     facility.type === 'clinic' ? 'Ø¹ÙŠØ§Ø¯Ø©' :
+                       facility.type === 'pharmacy' ? 'ØµÙŠØ¯Ù„ÙŠØ©' :
+                       facility.type === 'laboratory' ? 'Ù…Ø®ØªØ¨Ø±' :
+                       facility.type === 'dental' ? 'Ø¹ÙŠØ§Ø¯Ø© Ø£Ø³Ù†Ø§Ù†' :
+                       facility.type === 'specialized' ? 'Ù…ØªØ®ØµØµ' : facility.type}
+                  </p>
+                    <p className="text-xs text-gray-500 mt-1">{facility.category === 'public' ? 'Ø­ÙƒÙˆÙ…ÙŠ' : facility.category === 'private' ? 'Ø®Ø§Øµ' : 'Ø®ÙŠØ±ÙŠ'}</p>
+                </div>
+                <div className="flex flex-col items-end gap-2">
+                    {!facility.images?.main && (
+                      <span className="text-2xl">{facility.icon}</span>
+                    )}
+                    {facility.rating && (
+                      <div className="flex items-center gap-1">
+                        <span className="text-yellow-500">â­</span>
+                        <span className="text-xs text-gray-600">{facility.rating}</span>
+                      </div>
+                    )}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center text-gray-600">
+                  <span className="mr-2">ðŸ“</span>
+                  <span className="text-sm">{facility.address}</span>
+                </div>
+
+                <div className="flex items-center text-gray-600">
+                  <span className="mr-2">ðŸ˜ï¸</span>
+                  <span className="text-sm">{facility.district}</span>
+                  </div>
+
+                {facility.contact?.phone && facility.contact.phone.length > 0 && (
+                <div className="flex items-center text-gray-600">
+                  <span className="mr-2">ðŸ“ž</span>
+                    <a href={`tel:${facility.contact.phone[0]}`} className="text-sm text-blue-600 hover:underline">
+                      {facility.contact.phone[0]}
+                  </a>
+                  </div>
+                )}
+
+                <div className="flex items-center text-gray-600">
+                  <span className="mr-2">ðŸ•’</span>
+                  <span className="text-sm">{facility.workingHours}</span>
+                  </div>
+
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Ø§Ù„Ø®Ø¯Ù…Ø§Øª Ø§Ù„Ù…ØªØ§Ø­Ø©:</h4>
+                  <div className="flex flex-wrap gap-1">
+                    {facility.services.slice(0, 4).map((service) => (
+                    <span
+                        key={service}
+                        className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
+                    >
+                      {service}
+                    </span>
+                  ))}
+                  {facility.services.length > 4 && (
+                    <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                      +{facility.services.length - 4} Ø£Ø®Ø±Ù‰
+                    </span>
+                  )}
+                </div>
+              </div>
+
+                <div className="mt-4 flex gap-2">
+                  {facility.availability.appointments && (
+                  <button className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                    Ø§Ø­Ø¬Ø² Ù…ÙˆØ¹Ø¯
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => openMap(facility.position, facility.name)}
+                    className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    ðŸ—ºï¸ Ø§Ù„Ø®Ø±ÙŠØ·Ø©
+                  </button>
+                  {facility.images?.gallery && facility.images.gallery.length > 0 && (
+                    <button 
+                      onClick={() => openImageGallery(facility)}
+                      className="flex-1 bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors"
+                    >
+                      📸 الصور
+                    </button>
+                  )}
+                  <button className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors">
+                    المزيد
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <AppFooter />
+    </div>
+  );
+}
+
+
+
